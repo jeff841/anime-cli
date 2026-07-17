@@ -1,6 +1,8 @@
+from curses import wrapper
 from pathlib import Path
 from subprocess import run
 import pdb
+from cli import menu
 
 def access_dir(name):
     return Path(f'/home/jeff/Downloads/{name.lower()}/')
@@ -21,25 +23,23 @@ def show(anime):
                 int(name[2:name.index('-')]) if name.startswith('ep') else float('inf')
                 )
             )
-    for episode in episodes:
-        print(episode)
+    return episodes
 
-def play(anime,ep):
-    for episode in anime.iterdir():
-        if episode.name == f'ep{ep}':
-            run(['vlc','--fullscreen','--play-and-exit',episode])
-            run(['mv',f'{episode}',f'{episode}watched'])
-            ep += 1
-            continue
+def play(directory,episodes, index):
+    while index < len(episodes):
+        episode = directory/episodes[index]
+        run(['vlc','--fullscreen','--play-and-exit',str(episode)])
+        if not episode.name.endswith('watched'):
+            run(['mv',str(episode),str(episode) + 'watched'])
+        index += 1
 
 def main():
     anime = watch_input()
     directory = access_dir(anime)
-    show(directory)
-    breakpoint()
-    ep = choose_ep()
-    play(directory,ep)
-
+    choices = show(directory)
+    selected = wrapper(menu,choices)
+    play(directory,choices,selected)
+    
 if __name__ == '__main__':
     main()
 
