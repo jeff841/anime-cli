@@ -15,7 +15,7 @@ def watch_input():
 def play(anime,ep):
     for episode in anime.iterdir():
         if episode.name == f'ep{ep}':
-            run(['vlc', episode])
+            run(['cvlc', episode])
             break
 
 def main():
