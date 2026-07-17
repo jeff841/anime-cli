@@ -29,8 +29,8 @@ def play(directory,episodes, index):
     while index < len(episodes):
         episode = directory/episodes[index]
         run(['vlc','--fullscreen','--play-and-exit',str(episode)])
-        if not episode.name.endswith('WATCHED'):
-            run(['mv',str(episode),str(episode) + 'WATCHED'])
+        if not episode.name.endswith('watched'):
+            run(['mv',str(episode),str(episode) + 'watched'])
         index += 1
 
 def main():
