@@ -4,16 +4,15 @@ from subprocess import run
 import pdb
 from cli import menu
 
-def access_dir(name):
-    return Path(f'/home/jeff/Downloads/{name.lower()}/')
-
 def choose_ep():
     ep = int(input("Which episode? "))
     return ep
 
 def watch_input():
-    inp = input("What do you want to watch? ")
-    return inp
+    anime_list = Path(f'/home/jeff/anime_list/')
+    choices = [element.name for element in anime_list.iterdir()]
+    selected = wrapper(menu,choices)
+    return Path(f'/home/jeff/anime_list/{choices[selected]}')
 
 def show(anime):
     episodes = [ep.name for ep in anime.iterdir()] 
@@ -35,13 +34,17 @@ def play(directory,episodes, index):
 
 def main():
     anime = watch_input()
-    directory = access_dir(anime)
-    choices = show(directory)
+    choices = show(anime)
     selected = wrapper(menu,choices)
-    play(directory,choices,selected)
+    play(anime,choices,selected)
     
 if __name__ == '__main__':
     main()
+
+
+
+
+
 
 
 
