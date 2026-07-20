@@ -1,64 +1,66 @@
-# Anime CLI
 
-A lightweight Python command-line application for watching local anime episodes with VLC.
+# Anime Player
 
-The program allows you to search for an anime by name, play episodes, automatically continue to the next episode, and mark completed episodes as watched.
+A simple terminal-based anime player written in Python. It provides a curses-based interface for selecting a series and episode, launches VLC in fullscreen, and automatically keeps track of watched episodes.
 
 ## Features
 
-- 🔍 Search anime by name
-- ▶️ Launch episodes directly in VLC
-- ⏭️ Autoplay the next episode
-- ✅ Automatically mark completed episodes as watched
-- 📁 Simple folder-based organization
-- ⚡ Lightweight with no database or configuration required
+* Browse anime folders from a terminal menu.
+* Browse episodes in numerical order.
+* Play episodes in **VLC** in fullscreen.
+* Automatically marks an episode as watched after playback by appending `watched` to the filename.
+* Reset all watched episodes back to their original filenames from the menu.
+* Uses a lightweight curses interface for keyboard navigation.
 
 ## Requirements
 
-- Python 3.10+
-- VLC Media Player installed and available in your PATH
-- Linux (tested on Arch Linux)
+* Python 3
+* VLC Media Player
+* Linux
+* A terminal that supports curses
 
-## Folder Structure
+## Directory Structure
 
-Place each anime inside your `~/Downloads` directory.
+Place each anime inside its own folder under:
+
+```text
+/home/jeff/anime_list/
+```
 
 Example:
 
-```
-~/Downloads/
-├── one piece/
+```text
+anime_list/
+├── Nisekoi/
 │   ├── ep1-
 │   ├── ep2-
 │   ├── ep3-
-│   └── ...
-├── frieren/
+│   └── Extras/
+├── Clannad/
 │   ├── ep1-
-│   ├── ep2-
-│   └── ...
+│   └── ep2-
 ```
 
-The folder name is the name you will search for inside the program.
+## Episode Naming
 
-Episodes must be named using the following format:
+Episodes must follow this naming convention:
 
-```
+```text
 ep1-
 ep2-
 ep3-
 ...
 ```
 
-Do not include spaces or other naming schemes if you want the program to find them automatically.
+After an episode has been watched, it becomes:
+
+```text
+ep1-watched
+```
+
+The **Reset watched status** option removes the `watched` suffix from every episode in the selected series.
 
 ## Usage
-
-Clone the repository:
-
-```bash
-git clone https://github.com/jeff841/anime-cli
-cd anime-cli
-```
 
 Run the program:
 
@@ -66,31 +68,19 @@ Run the program:
 python main.py
 ```
 
-When prompted, enter the name of the anime folder.
-
-Example:
-
-```
-What do you want to watch?
-> frieren
-```
-
-Then choose the episode number.
-
-## Watched Episodes
-
-After an episode finishes playing, the program automatically marks it as watched.
-
-## Autoplay
-
-When an episode ends, the next episode starts automatically, allowing you to binge-watch without manually selecting each episode.
+1. Select an anime.
+2. Select an episode.
+3. VLC launches in fullscreen.
+4. When playback finishes, the episode is marked as watched.
+5. Use **Reset watched status** at any time to clear all watched markers.
 
 ## Notes
 
-- Anime folders must be located inside `~/Downloads`.
-- Folder names determine what you search for.
-- Episode filenames must follow the `ep<number>-` format.
+* Episode files are sorted numerically regardless of the filesystem order.
+* Non-episode files and folders (such as `Extras`) are listed after the numbered episodes.
+* The project uses Python's `pathlib` module for filesystem operations and `curses` for the interactive interface.
 
 ## License
 
-This project is open source.
+This project is open source and available under the MIT License.
+
