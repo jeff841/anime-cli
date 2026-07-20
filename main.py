@@ -4,10 +4,6 @@ from subprocess import run
 import pdb
 from cli import menu
 
-def choose_ep():
-    ep = int(input("Which episode? "))
-    return ep
-
 def watch_input():
     anime_list = Path(f'/home/jeff/anime_list/')
     choices = [element.name for element in anime_list.iterdir()]
@@ -22,13 +18,16 @@ def show(anime):
                 int(name[2:name.index('-')]) if name.startswith('ep') else float('inf')
                 )
             )
+    episodes.append('Reset watched status')
+    episodes.append('Exit')
     return episodes
 
 def play(directory,episodes, index):
     while index < len(episodes):
         episode = directory/episodes[index]
-        run(['vlc','--fullscreen','--play-and-exit',str(episode)])
-        if not episode.name.endswith('watched'):
+        if episode.name.startswith('ep'):
+            run(['vlc','--fullscreen','--play-and-exit',str(episode)])
+        if not str(episode).endswith('watched') and str(episode).startswith('ep'):
             run(['mv',str(episode),str(episode) + 'watched'])
         index += 1
 
