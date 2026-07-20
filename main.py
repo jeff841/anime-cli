@@ -27,14 +27,25 @@ def play(directory,episodes, index):
         episode = directory/episodes[index]
         if episode.name.startswith('ep'):
             run(['vlc','--fullscreen','--play-and-exit',str(episode)])
-        if not str(episode).endswith('watched') and str(episode).startswith('ep'):
-            run(['mv',str(episode),str(episode) + 'watched'])
+        if not episode.name.endswith('watched') and episode.name.startswith('ep'):
+            episode.rename(directory / (episode.name + 'watched'))
         index += 1
+
+def reset_watched(directory):
+    for episode in directory.iterdir():
+        if episode.name.endswith('watched'):
+            new_name = directory/episode.name.removesuffix('watched')
+            episode.rename(new_name)
 
 def main():
     anime = watch_input()
     choices = show(anime)
     selected = wrapper(menu,choices)
+    if choices[selected] == 'Reset watched status':
+        reset_watched(anime)
+        main()
+    if choices[selected] == 'Exit':
+        return
     play(anime,choices,selected)
     
 if __name__ == '__main__':
