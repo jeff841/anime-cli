@@ -61,8 +61,8 @@ def extra(directory):
 
 def main():
     anime = watch_input()
-    choices = show(anime)
     while True:
+        choices = show(anime)
         selected = wrapper(menu,choices)
         if choices[selected] == 'Extras':
             extra(anime)
