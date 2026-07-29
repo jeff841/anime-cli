@@ -1,15 +1,33 @@
 from curses import wrapper
 from pathlib import Path
+from os import path
 from subprocess import run
 import pdb
 from cli import menu
+from json import dump, load
 
 def watch_input():
-    anime_list = Path(f'/home/jeff/anime_list/')
-    choices = [element.name for element in anime_list.iterdir()]
-    selected = wrapper(menu,choices)
-    return Path(f'/home/jeff/anime_list/{choices[selected]}')
-
+    with open("/home/jeff/git_projects/anime/directory.json", 'r+') as f:
+        if path.getsize(f.name) == 0:
+            data = {
+                    "anime_list": input("Enter the directory where your episode files are located: ")                    
+                    }
+            dump(data,f)
+        else:
+            data = load(f)
+        directory = Path(data["anime_list"])
+        choices = [element.name for element in directory.iterdir()]
+        choices.append('Change anime directory')
+        choices.append('Exit')
+        selected = wrapper(menu,choices)
+        if choices[selected] == 'Change anime directory':
+            run(['rm',f'{f.name}'])
+            run(['touch','/home/jeff/git_projects/anime/directory.json'])
+            watch_input()
+        if choices[selected] == 'Exit':
+            return
+        return Path(f'{directory}/{choices[selected]}')
+            
 def show(anime):
     episodes = [ep.name for ep in anime.iterdir()] 
     episodes.sort(
@@ -29,12 +47,15 @@ def show(anime):
 
 def play(directory,episodes,index):
     while index < len(episodes):
-        episode = directory/episodes[index]
-        if episode.name.startswith('ep'):
-            run(['vlc','--fullscreen','--play-and-exit',str(episode)])
-        if not episode.name.endswith('watched') and episode.name.startswith('ep'):
-            episode.rename(directory / (episode.name + 'watched'))
-        index += 1
+        if directory is not None:
+            episode = directory/episodes[index]
+            if episode.name.startswith('ep'):
+                run(['vlc','--fullscreen','--play-and-exit',str(episode)])
+            if not episode.name.endswith('watched') and episode.name.startswith('ep'):
+                episode.rename(directory / (episode.name + 'watched'))
+            index += 1
+        else:
+            return
 
 def reset_watched(directory):
     for episode in directory.iterdir():
@@ -61,6 +82,8 @@ def extra(directory):
 
 def main():
     anime = watch_input()
+    if anime is None:
+        return
     while True:
         choices = show(anime)
         selected = wrapper(menu,choices)
@@ -70,7 +93,8 @@ def main():
             reset_watched(anime)
             continue
         if choices[selected] == 'Exit':
-            break
+            anime = None
+            main()
         play(anime,choices,selected)
     
 if __name__ == '__main__':
