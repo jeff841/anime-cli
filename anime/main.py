@@ -3,9 +3,9 @@ from pathlib import Path
 from os import path
 from subprocess import run
 import pdb
-from cli import menu
+from .cli import menu
 from json import dump, load
-from renamer import rename
+from .renamer import rename
 from argparse import ArgumentParser
 
 def watch_input():
