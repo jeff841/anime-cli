@@ -5,6 +5,8 @@ from subprocess import run
 import pdb
 from cli import menu
 from json import dump, load
+from renamer import rename
+from argparse import ArgumentParser
 
 def watch_input():
     with open("/home/jeff/git_projects/anime/directory.json", 'r+') as f:
@@ -81,21 +83,29 @@ def extra(directory):
         index_extra += 1
 
 def main():
-    anime = watch_input()
-    if anime is None:
-        return
-    while True:
-        choices = show(anime)
-        selected = wrapper(menu,choices)
-        if choices[selected] == 'Extras':
-            extra(anime)
-        if choices[selected] == 'Reset watched status':
-            reset_watched(anime)
-            continue
-        if choices[selected] == 'Exit':
-            anime = None
-            main()
-        play(anime,choices,selected)
+    parser = ArgumentParser()
+    subparsers = parser.add_subparsers(dest="command")
+    rename_parser = subparsers.add_parser("rename")
+    rename_parser.add_argument("directory",type=Path)
+    args = parser.parse_args()
+    if args.command == "rename":
+        rename(args.directory)
+    else:
+        anime = watch_input()
+        if anime is None:
+            return
+        while True:
+            choices = show(anime)
+            selected = wrapper(menu,choices)
+            if choices[selected] == 'Extras':
+                extra(anime)
+            if choices[selected] == 'Reset watched status':
+                reset_watched(anime)
+                continue
+            if choices[selected] == 'Exit':
+                anime = None
+                main()
+            play(anime,choices,selected)
     
 if __name__ == '__main__':
     main()
