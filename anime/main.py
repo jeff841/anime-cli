@@ -8,9 +8,11 @@ from json import dump, load
 from .renamer import rename
 from argparse import ArgumentParser
 from tkinter import Tk,filedialog
+from platformdirs import user_config_dir
+from shutil import which
 
 def watch_input():
-    CONFIG_DIR = Path.home()/'.config'/'anime'
+    CONFIG_DIR = Path(user_config_dir('anime'))
     CONFIG_DIR.mkdir(parents=True,exist_ok=True)
     CONFIG_FILE = CONFIG_DIR/'directory.json'
     CONFIG_FILE.touch(exist_ok=True)
@@ -49,7 +51,7 @@ def watch_input():
         elif choices[selected] == 'Exit':
             return
         else:
-            return Path(f'{directory}/{choices[selected]}')
+            return Path(directory/choices[selected])
             
 def show(anime):
     episodes = [ep.name for ep in anime.iterdir()] 
@@ -69,6 +71,9 @@ def show(anime):
     return episodes
 
 def play(directory,episodes,index):
+    VLC = which('vlc') or which('vlc.exe')
+    if VLC is None:
+        raise RuntimeError("VLC is not installed or is not in PATH")
     while index < len(episodes):
         if directory is not None:
             episode = directory/episodes[index]

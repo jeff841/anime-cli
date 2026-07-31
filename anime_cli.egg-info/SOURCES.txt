@@ -1,6 +1,7 @@
 README.md
 pyproject.toml
 anime/__init__.py
+anime/__main__.py
 anime/cli.py
 anime/main.py
 anime/renamer.py

@@ -10,3 +10,8 @@ requires-python = ">=3.10"
 
 [project.scripts]
 anime = "anime.main:main"
+
+dependencies = [
+    "platformdirs",
+    'windows-curses; platform_system == "Windows"',
+]
