@@ -1,17 +1,18 @@
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "anime-cli"
-version = "1.0.0"
-description = "A terminal anime player using VLC"
+version = "0.1.0"
+description = "A terminal-based anime player."
+readme = "README.md"
 requires-python = ">=3.10"
+
+dependencies = [
+    "platformdirs",
+    "windows-curses; platform_system == 'Windows'",
+]
 
 [project.scripts]
 anime = "anime.main:main"
 
-dependencies = [
-    "platformdirs",
-    'windows-curses; platform_system == "Windows"',
-]
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
