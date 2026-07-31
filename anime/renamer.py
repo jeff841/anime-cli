@@ -1,18 +1,12 @@
-from os import walk
-from os.path import join
-from subprocess import run
 from pathlib import Path
 
-def rename(directory):
-    for folder,subfolders,files in walk(directory):
-        sor = []
-        for file in files:
-            sor.append(file)
-        sor.sort()
-        count = 1
-        for i in sor:
-            run(['mv',directory/i,str(directory/f'ep{count}-')])
-            count+=1
+def rename(directory: Path):
+    files = sorted(
+            f for f in directory.iterdir()
+            if f.is_file()
+            )
+    for count,file in enumerate(files,start=1):
+        file.rename(directory/f"ep{count}-")
 
     
         
