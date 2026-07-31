@@ -7,12 +7,24 @@ from .cli import menu
 from json import dump, load
 from .renamer import rename
 from argparse import ArgumentParser
+from tkinter import Tk,filedialog
 
 def watch_input():
     with open("/home/jeff/git_projects/anime/directory.json", 'r+') as f:
         if path.getsize(f.name) == 0:
+            choicesd = ["Enter the directory where your episode files are located","Open file explorer","Exit"]
+            selectedd = wrapper(menu,choicesd)
+            if choicesd[selectedd] == 'Enter the directory where your episode files are located':
+                inp = input("Directory: ")
+            elif choicesd[selectedd] == 'Open file explorer':
+                root = Tk()
+                root.withdraw()
+                folder = filedialog.askdirectory(title='Select your directory')
+                inp = folder
+            else:
+                return
             data = {
-                    "anime_list": input("Enter the directory where your episode files are located: ")                    
+                    "anime_list": inp                   
                     }
             dump(data,f)
         else:
