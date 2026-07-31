@@ -19,16 +19,21 @@ def watch_input():
             choicesd = ["Enter the directory where your episode files are located","Open file explorer","Exit"]
             selectedd = wrapper(menu,choicesd)
             if choicesd[selectedd] == 'Enter the directory where your episode files are located':
-                inp = input("Directory: ")
+                while True:                
+                    inp = input("Directory: ")
+                    d = Path(inp)
+                    if d.is_dir():
+                        break
+                    print("This directory does not exist")
             elif choicesd[selectedd] == 'Open file explorer':
                 root = Tk()
                 root.withdraw()
                 folder = filedialog.askdirectory(title='Select your directory')
-                inp = folder
+                d = folder
             else:
                 return
             data = {
-                    "anime_list": inp                   
+                    "anime_list": str(d)                   
                     }
             dump(data,f)
         else:

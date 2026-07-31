@@ -10,21 +10,30 @@ from argparse import ArgumentParser
 from tkinter import Tk,filedialog
 
 def watch_input():
-    with open("/home/jeff/git_projects/anime/directory.json", 'r+') as f:
+    CONFIG_DIR = Path.home()/'.config'/'anime'
+    CONFIG_DIR.mkdir(parents=True,exist_ok=True)
+    CONFIG_FILE = CONFIG_DIR/'directory.json'
+    CONFIG_FILE.touch(exist_ok=True)
+    with CONFIG_FILE.open('r+') as f:
         if path.getsize(f.name) == 0:
             choicesd = ["Enter the directory where your episode files are located","Open file explorer","Exit"]
             selectedd = wrapper(menu,choicesd)
             if choicesd[selectedd] == 'Enter the directory where your episode files are located':
-                inp = input("Directory: ")
+                while True:                
+                    inp = input("Directory: ")
+                    d = Path(inp)
+                    if d.is_dir():
+                        break
+                    print("This directory does not exist")
             elif choicesd[selectedd] == 'Open file explorer':
                 root = Tk()
                 root.withdraw()
                 folder = filedialog.askdirectory(title='Select your directory')
-                inp = folder
+                d = folder
             else:
                 return
             data = {
-                    "anime_list": inp                   
+                    "anime_list": str(d)                   
                     }
             dump(data,f)
         else:
@@ -35,12 +44,12 @@ def watch_input():
         choices.append('Exit')
         selected = wrapper(menu,choices)
         if choices[selected] == 'Change anime directory':
-            run(['rm',f'{f.name}'])
-            run(['touch','/home/jeff/git_projects/anime/directory.json'])
-            watch_input()
-        if choices[selected] == 'Exit':
+            CONFIG_FILE.write_text('')
+            return watch_input()
+        elif choices[selected] == 'Exit':
             return
-        return Path(f'{directory}/{choices[selected]}')
+        else:
+            return Path(f'{directory}/{choices[selected]}')
             
 def show(anime):
     episodes = [ep.name for ep in anime.iterdir()] 
