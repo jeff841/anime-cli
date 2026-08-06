@@ -1,5 +1,284 @@
 Metadata-Version: 2.4
 Name: anime-cli
-Version: 1.0.0
-Summary: A terminal anime player using VLC
+Version: 0.1.0
+Summary: A terminal-based anime player.
 Requires-Python: >=3.10
+Description-Content-Type: text/markdown
+Requires-Dist: platformdirs
+Requires-Dist: windows-curses; platform_system == "Windows"
+
+
+# Anime Player
+
+A cross-platform terminal-based anime player written in Python. It provides a curses interface for browsing your anime library, launches episodes in VLC, automatically tracks watched episodes, and includes a built-in episode renamer.
+
+## Features
+
+* Browse your anime library through a terminal interface.
+* Select your anime library by:
+
+  * entering the path manually, or
+  * choosing a directory through a graphical folder picker.
+* Remembers your selected library between launches.
+* Change the anime library at any time from the main menu.
+* Browse episodes in numerical order.
+* Supports episodes (`ep`), openings (`op`), endings (`ed`), and an optional `Extras` folder.
+* Plays episodes in **VLC** fullscreen.
+* Automatically continues through episodes.
+* Automatically marks watched episodes.
+* Reset watched status.
+* Built-in episode renamer.
+* Cross-platform support for Linux, Windows, and macOS.
+* Installable as the `anime` terminal command.
+
+## Requirements
+
+* Python 3.10+
+* VLC installed and available in your system `PATH`
+* A terminal that supports the application interface
+
+### Windows
+
+The application requires the `windows-curses` package automatically when installed on Windows.
+
+## Installation
+
+### Using pipx (recommended)
+
+Install pipx:
+
+#### Arch Linux
+
+```bash
+sudo pacman -S python-pipx
+```
+
+Enable pipx:
+
+```bash
+pipx ensurepath
+```
+
+Restart your terminal after running the command.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/jeff841/anime-cli.git
+cd anime-cli
+```
+
+Install:
+
+```bash
+pipx install .
+```
+
+Run:
+
+```bash
+anime
+```
+
+## Development Installation
+
+For development:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+Run:
+
+```bash
+anime
+```
+
+## Usage
+
+Start the player:
+
+```bash
+anime
+```
+
+On the first launch, the application asks for your anime library location.
+
+You can either:
+
+* type the directory path manually, or
+* select it using the graphical folder picker.
+
+The selected directory is saved automatically and reused on future launches.
+
+Example library:
+
+```text
+Anime/
+├── Frieren/
+├── Vinland Saga/
+├── Bocchi the Rock/
+└── Steins;Gate/
+```
+
+Choose:
+
+```text
+Change anime directory
+```
+
+from the menu to select a different library.
+
+## Configuration
+
+The application stores user configuration using the operating system's standard configuration directory.
+
+Examples:
+
+Linux:
+
+```text
+~/.config/anime/directory.json
+```
+
+Windows:
+
+```text
+C:\Users\<username>\AppData\Local\anime\directory.json
+```
+
+macOS:
+
+```text
+~/Library/Application Support/anime/directory.json
+```
+
+## Episode Naming
+
+The built-in renamer converts files into the naming format used by the player.
+
+Run:
+
+```bash
+anime rename /path/to/series
+```
+
+Example:
+
+Before:
+
+```text
+Episode 1.mkv
+Episode 2.mkv
+Episode 3.mkv
+```
+
+After:
+
+```text
+ep1-
+ep2-
+ep3-
+```
+
+The player uses these names to sort episodes correctly.
+
+Openings and endings are also supported:
+
+```text
+op1-
+ed1-
+```
+
+## Episode Ordering
+
+Episodes are sorted numerically instead of alphabetically.
+
+Example:
+
+Correct:
+
+```text
+ep1-
+ep2-
+ep3-
+ep10-
+ep11-
+```
+
+instead of:
+
+```text
+ep1-
+ep10-
+ep11-
+ep2-
+```
+
+## Watched Episodes
+
+After an episode finishes playing, it is automatically marked as watched.
+
+Example:
+
+Before:
+
+```text
+ep5-
+```
+
+After:
+
+```text
+ep5-watched
+```
+
+Watched status can be removed using:
+
+```text
+Reset watched status
+```
+
+## Extras
+
+Series can contain an `Extras` directory.
+
+Example:
+
+```text
+Frieren/
+├── ep1-
+├── ep2-
+└── Extras/
+    ├── op1-
+    └── ed1-
+```
+
+Extras support:
+
+* episode sorting
+* VLC playback
+* watched tracking
+* resetting watched status
+
+## Project Structure
+
+```text
+anime-cli/
+├── anime/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── main.py
+│   ├── cli.py
+│   └── renamer.py
+├── pyproject.toml
+├── README.md
+└── .gitignore
+```
+
+## License
+
+This project is licensed under the MIT License.
+
