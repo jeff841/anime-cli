@@ -2,8 +2,13 @@ README.md
 pyproject.toml
 anime/__init__.py
 anime/__main__.py
+anime/anime_info.py
 anime/cli.py
+anime/key.py
+anime/kitty.py
 anime/main.py
+anime/mal.py
+anime/picture.py
 anime/renamer.py
 anime_cli.egg-info/PKG-INFO
 anime_cli.egg-info/SOURCES.txt

@@ -1,8 +1,12 @@
 from curses import wrapper
 from pathlib import Path
-from os import path
+from os import path,environ,walk
 from subprocess import run
 import pdb
+
+from anime.key import key
+from .anime_info import AnimeInfo
+from .mal import MyAnimeList
 from .cli import menu
 from json import dump, load
 from .renamer import rename
@@ -11,8 +15,12 @@ from tkinter import Tk,filedialog
 from platformdirs import user_config_dir
 from shutil import which
 from typing import reveal_type
+from .picture import PICTURE_DIR, get_picture
+from anime import picture
+from functools import partial
+from sys import argv
 
-def watch_input():
+def watch_input(anime_name=None):
     CONFIG_DIR = Path(user_config_dir('anime'))
     CONFIG_DIR.mkdir(parents=True,exist_ok=True)
     CONFIG_FILE = CONFIG_DIR/'directory.json'
@@ -50,6 +58,10 @@ def watch_input():
         else:
             data = load(f)
         directory = Path(data["anime_list"])
+        if anime_name is not None:
+            for series in directory.iterdir():
+                if series.name.lower() == anime_name.lower():
+                    return series
         choices = [element.name for element in directory.iterdir()]
         choices.append('Change anime directory')
         choices.append('Exit')
@@ -61,9 +73,29 @@ def watch_input():
             return
         else:
             return Path(directory/choices[selected])
+
+def get_information(mal,anime_name,info_storage):
+    results = mal.search_anime(input("Anime name: "))
+    nodes = []
+    for anime in results["data"]:
+        nodes.append({
+            "id": anime["node"]["id"],
+            "title": anime["node"]["title"] 
+            })
+    choices = [node["title"] for node in nodes]
+    selected = wrapper(menu,choices)
+    anime_id = nodes[selected]["id"]
+    info = mal.get_anime(anime_id)
+    picture = get_picture(
+            info["id"],
+            info["main_picture"]["large"]
+            )
+    info_storage.save(anime_name,info)
+    return info
             
 def show(anime):
-    episodes = [ep.name for ep in anime.iterdir()] 
+    episodes = [ep.name for ep in anime.iterdir()]
+    episodes.append("Change anime information")
     episodes.sort(
             key=lambda name: (
                 not name.startswith(('ep','op','ed')),
@@ -87,7 +119,7 @@ def play(directory,episodes,index):
         if directory is not None:
             episode = directory/episodes[index]
             if episode.name.startswith('ep'):
-                run(['vlc','--fullscreen','--play-and-exit',str(episode)])
+                run([VLC,'--fullscreen','--play-and-exit',str(episode)])
             if not episode.name.endswith('watched') and episode.name.startswith('ep'):
                 episode.rename(directory / (episode.name + 'watched'))
             index += 1
@@ -118,28 +150,63 @@ def extra(directory):
         index_extra += 1
 
 def main():
+    anime_info = AnimeInfo()
     parser = ArgumentParser()
-    subparsers = parser.add_subparsers(dest="command")
-    rename_parser = subparsers.add_parser("rename")
-    rename_parser.add_argument("directory",type=Path)
+    parser.add_argument("anime_name",type=str,nargs='?')
+    parser.add_argument("--rename",type=Path)
+    parser.add_argument("--key",type=str)
     args = parser.parse_args()
-    if args.command == "rename":
-        rename(args.directory)
+    mal = MyAnimeList(key(key)) 
+    if args.rename:
+        rename(args.rename)
+        return
+    elif args.key:
+       key(args.key)
+       print("Key added!")
+       return
     else:
-        anime = watch_input()
+        anime = watch_input(args.anime_name)
+        info = anime_info.get(anime.name)
+        if info is None:
+            info = get_information(mal,anime.name,anime_info)
+        picture = PICTURE_DIR/f"{info['id']}.jpg"
+        if not picture.exists():
+            if "main_picture" in info:
+                picture = get_picture(
+                        info["id"],
+                        info["main_picture"]["large"]
+                        )
+        infos = [
+            info["title"],
+            info["synopsis"],
+        ]
+        picture = PICTURE_DIR/f"{info['id']}.jpg"
         if anime is None:
             return
         while True:
             choices = show(anime)
-            selected = wrapper(menu,choices)
+            selected = wrapper(
+                    partial(
+                        menu,
+                        choices=choices,
+                        items=infos,
+                        picture=picture,
+                        )
+                    )
+            if choices[selected] == 'Change anime information':
+                info = get_information(mal,anime.name,anime_info)
+                infos = [
+                    info["title"],
+                    info["synopsis"],
+                    ]
+                continue
             if choices[selected] == 'Extras':
                 extra(anime)
             if choices[selected] == 'Reset watched status':
                 reset_watched(anime)
                 continue
             if choices[selected] == 'Exit':
-                anime = None
-                main()
+                return run('anime')
             play(anime,choices,selected)
     
 if __name__ == '__main__':
