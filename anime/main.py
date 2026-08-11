@@ -3,7 +3,6 @@ from pathlib import Path
 from os import path,environ,walk
 from subprocess import run
 import pdb
-
 from anime.key import key
 from .anime_info import AnimeInfo
 from .mal import MyAnimeList
@@ -153,12 +152,12 @@ def main():
     anime_info = AnimeInfo()
     parser = ArgumentParser()
     parser.add_argument("anime_name",type=str,nargs='?')
-    parser.add_argument("--rename",type=Path)
+    parser.add_argument("--rename",action='store_true')
     parser.add_argument("--key",type=str)
     args = parser.parse_args()
     mal = MyAnimeList(key(key)) 
     if args.rename:
-        rename(args.rename)
+        rename()
         return
     elif args.key:
        key(args.key)
