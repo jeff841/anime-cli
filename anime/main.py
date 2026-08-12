@@ -1,3 +1,4 @@
+import argparse
 from curses import wrapper
 from pathlib import Path
 from os import path,environ,walk
@@ -8,7 +9,7 @@ from .anime_info import AnimeInfo
 from .mal import MyAnimeList
 from .cli import menu
 from json import dump, load
-from .renamer import rename
+from .renamer import rename, rename_sort
 from argparse import ArgumentParser
 from tkinter import Tk,filedialog
 from platformdirs import user_config_dir
@@ -18,6 +19,7 @@ from .picture import PICTURE_DIR, get_picture
 from anime import picture
 from functools import partial
 from sys import argv
+from re import fullmatch,search
 
 def watch_input(anime_name=None):
     CONFIG_DIR = Path(user_config_dir('anime'))
@@ -148,21 +150,44 @@ def extra(directory):
             return
         index_extra += 1
 
+def episode(value):
+    if fullmatch(r'ep\d+',value):
+        return value
+    raise argparse.ArgumentTypeError('Episode must be in the format ep<number>')
+
 def main():
     anime_info = AnimeInfo()
     parser = ArgumentParser()
     parser.add_argument("anime_name",type=str,nargs='?')
-    parser.add_argument("--rename",action='store_true')
+    parser.add_argument("ep",nargs='?',type=str)
+    parser.add_argument("--rename",nargs='?',const='menu',type=episode)
     parser.add_argument("--key",type=str)
     args = parser.parse_args()
     mal = MyAnimeList(key(key)) 
-    if args.rename:
-        rename()
+    if args.rename is not None:
+        if args.rename == 'menu':
+            rename()
+        else:
+            rename_sort(args.rename)
         return
     elif args.key:
        key(args.key)
        print("Key added!")
        return
+    elif args.ep is not None and args.anime_name is None:
+       parser.error("Please provide an anime to play")
+    elif args.ep:
+        ep = episode(args.ep)
+        anime = watch_input(args.anime_name)
+        choices = show(anime)
+        match = search(r'\d+$',ep)
+        if match:
+            suffix = match.group()
+            selected = int(suffix) - 1
+            play(anime,choices,selected)
+        else:
+            print('No such episode')
+            return
     else:
         anime = watch_input(args.anime_name)
         info = anime_info.get(anime.name)
