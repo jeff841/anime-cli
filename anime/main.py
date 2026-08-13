@@ -1,179 +1,31 @@
-import argparse
 from curses import wrapper
-from pathlib import Path
-from os import path,environ,walk
-from subprocess import run
-import pdb
-from anime.key import key
-from .anime_info import AnimeInfo
-from .mal import MyAnimeList
 from .cli import menu
 from json import dump, load
 from .renamer import rename, rename_sort
 from argparse import ArgumentParser
-from tkinter import Tk,filedialog
-from platformdirs import user_config_dir
-from shutil import which
-from typing import reveal_type
-from .picture import PICTURE_DIR, get_picture
-from anime import picture
-from functools import partial
-from sys import argv
-from re import fullmatch,search
-
-def watch_input(anime_name=None):
-    CONFIG_DIR = Path(user_config_dir('anime'))
-    CONFIG_DIR.mkdir(parents=True,exist_ok=True)
-    CONFIG_FILE = CONFIG_DIR/'directory.json'
-    CONFIG_FILE.touch(exist_ok=True)
-    with CONFIG_FILE.open('r+') as f:
-        if path.getsize(f.name) == 0:
-            choicesd = ["Enter the directory where your series folders are located","Open file explorer","Exit"]
-            selectedd = wrapper(menu,choicesd)
-            if choicesd[selectedd] == 'Enter the directory where your series folders are located':
-                while True:                
-                    inp = input("Directory: ")
-                    d = Path(inp)
-                    if d.is_dir():
-                        for cont in d.iterdir():
-                            if not cont.is_dir():
-                                print("Select the directory in which you store your series folders. The structure should be: \n./\n    anime1/\n        ep1-\n        ep2-\n        ...\n    anime2/\n        ep1-\n        ep2-\n        ...")
-                                return watch_input()
-                    print("This directory does not exist")
-            elif choicesd[selectedd] == 'Open file explorer':
-                root = Tk()
-                root.withdraw()
-                folder = filedialog.askdirectory(title='Select your directory')
-                d = folder
-                dpath = Path(d)
-                for cont in dpath.iterdir():
-                    if not cont.is_dir():
-                        print("Select the directory in which you store your series folders. The structure should be: \n./\n    anime1/\n        ep1-\n        ep2-\n        ...\n    anime2/\n        ep1-\n        ep2-\n        ...")
-                        return watch_input()
-            else:
-                return
-            data = {
-                    "anime_list": str(d)                   
-                    }
-            dump(data,f)
-        else:
-            data = load(f)
-        directory = Path(data["anime_list"])
-        if anime_name is not None:
-            for series in directory.iterdir():
-                if series.name.lower() == anime_name.lower():
-                    return series
-        choices = [element.name for element in directory.iterdir()]
-        choices.append('Change anime directory')
-        choices.append('Exit')
-        selected = wrapper(menu,choices)
-        if choices[selected] == 'Change anime directory':
-            CONFIG_FILE.write_text('')
-            return watch_input()
-        elif choices[selected] == 'Exit':
-            return
-        else:
-            return Path(directory/choices[selected])
-
-def get_information(mal,anime_name,info_storage):
-    results = mal.search_anime(input("Anime name: "))
-    nodes = []
-    for anime in results["data"]:
-        nodes.append({
-            "id": anime["node"]["id"],
-            "title": anime["node"]["title"] 
-            })
-    choices = [node["title"] for node in nodes]
-    selected = wrapper(menu,choices)
-    anime_id = nodes[selected]["id"]
-    info = mal.get_anime(anime_id)
-    picture = get_picture(
-            info["id"],
-            info["main_picture"]["large"]
-            )
-    info_storage.save(anime_name,info)
-    return info
-            
-def show(anime):
-    episodes = [ep.name for ep in anime.iterdir()]
-    episodes.append("Change anime information")
-    episodes.sort(
-            key=lambda name: (
-                not name.startswith(('ep','op','ed')),
-                int(name[2:name.index('-')]) if name.startswith(('ep','op','ed')) else float('inf')
-                )
-            )
-    episodes.sort(
-            key = lambda name: (
-                not name.startswith('op')
-                )
-            )
-    episodes.append('Reset watched status')
-    episodes.append('Exit')
-    return episodes
-
-def play(directory,episodes,index):
-    VLC = which('vlc') or which('vlc.exe')
-    if VLC is None:
-        raise RuntimeError("VLC is not installed or is not in PATH")
-    while index < len(episodes):
-        if directory is not None:
-            episode = directory/episodes[index]
-            if episode.name.startswith('ep'):
-                run([VLC,'--fullscreen','--play-and-exit',str(episode)])
-            if not episode.name.endswith('watched') and episode.name.startswith('ep'):
-                episode.rename(directory / (episode.name + 'watched'))
-            index += 1
-        else:
-            return
-
-def reset_watched(directory):
-    for episode in directory.iterdir():
-        if episode.name.endswith('watched'):
-            new_name = directory/episode.name.removesuffix('watched')
-            episode.rename(new_name)
-
-def extra(directory):
-    directory_extra = directory/'Extras'
-    episodes_extra = show(directory_extra)
-    index_extra = wrapper(menu,episodes_extra)
-    while index_extra < len(episodes_extra):
-        episode = directory_extra/episodes_extra[index_extra]
-        if episode.name.startswith(('ep','op','ed')):
-            run(['vlc','--fullscreen','--play-and-exit',str(episode)])
-        if not episode.name.endswith('watched') and episode.name.startswith(('ep','op','ed')):
-            episode.rename(directory_extra/(episode.name + 'watched'))
-        if episodes_extra[index_extra] == 'Reset watched status':
-            reset_watched(directory_extra)
-            extra(directory)
-        if episodes_extra[index_extra] == 'Exit':
-            return
-        index_extra += 1
-
-def episode(value):
-    if fullmatch(r'ep\d+',value):
-        return value
-    raise argparse.ArgumentTypeError('Episode must be in the format ep<number>')
+from .picture import get_picture
+from re import search
+from .api import AnimeAPI
+from .watch_input import watch_input
+from .show import show
+from .play import play
+from .reset_watched import reset_watched
+from .extra import extra
+from .episode import episode
+import sys
 
 def main():
-    anime_info = AnimeInfo()
-    parser = ArgumentParser()
-    parser.add_argument("anime_name",type=str,nargs='?')
-    parser.add_argument("ep",nargs='?',type=str)
-    parser.add_argument("--rename",nargs='?',const='menu',type=episode)
-    parser.add_argument("--key",type=str)
-    args = parser.parse_args()
-    mal = MyAnimeList(key(key)) 
+    parser = ArgumentParser(description="Manage and watch your anime!")
+    parser.add_argument("anime_name",type=str,nargs='?',help="Name of the anime you want to watch")
+    parser.add_argument("ep",nargs='?',type=str,help="Episode you want to watch (e.g. ep1, ep2, ep10)")
+    parser.add_argument("--rename",nargs='?',const='menu',type=episode,help="Command to rename the episodes in your series folder so it fits the application structure (e.g. anime --rename /path/to/your/selected/directory, or just anime --rename to open selection screen)")
+    args = parser.parse_args() 
     if args.rename is not None:
         if args.rename == 'menu':
             rename()
         else:
             rename_sort(args.rename)
         return
-    elif args.key:
-       key(args.key)
-       print("Key added!")
-       return
     elif args.ep is not None and args.anime_name is None:
        parser.error("Please provide an anime to play")
     elif args.ep:
@@ -190,39 +42,34 @@ def main():
             return
     else:
         anime = watch_input(args.anime_name)
-        info = anime_info.get(anime.name)
-        if info is None:
-            info = get_information(mal,anime.name,anime_info)
-        picture = PICTURE_DIR/f"{info['id']}.jpg"
-        if not picture.exists():
-            if "main_picture" in info:
-                picture = get_picture(
-                        info["id"],
-                        info["main_picture"]["large"]
-                        )
-        infos = [
-            info["title"],
-            info["synopsis"],
-        ]
-        picture = PICTURE_DIR/f"{info['id']}.jpg"
+        items = None
+        picture = None
+        api = AnimeAPI("http://127.0.0.1:8000")
         if anime is None:
             return
+        metadata_file = anime/"anime.json"
+        metadata_file.touch(exist_ok=True)
+        if metadata_file.stat().st_size > 0:
+            with metadata_file.open() as f:
+                metadata = load(f)
+            results = api.get_anime(metadata["id"])
+            picture = get_picture(results["id"],results["main_picture"]["large"])
+            items = [results["title"],results["synopsis"],", ".join(genre["name"] for genre in results["genres"])]
         while True:
             choices = show(anime)
-            selected = wrapper(
-                    partial(
-                        menu,
-                        choices=choices,
-                        items=infos,
-                        picture=picture,
-                        )
-                    )
-            if choices[selected] == 'Change anime information':
-                info = get_information(mal,anime.name,anime_info)
-                infos = [
-                    info["title"],
-                    info["synopsis"],
-                    ]
+            selected = wrapper(menu,choices,items,picture)
+            if choices[selected] == 'Get anime information':
+                query = input("Enter anime name: ").strip().lower()
+                data = api.search_anime(query)
+                choices2 = [anime["title"] for anime in data]
+                selected2 = wrapper(menu,choices2)
+                anime_id = data[selected2]["id"]
+                metadata_file = anime/"anime.json"
+                with metadata_file.open('w') as f:
+                    dump({"id": anime_id},f)
+                results = api.get_anime(anime_id)
+                picture = get_picture(results["id"],results["main_picture"]["large"])
+                items = [results["title"], results["synopsis"],", ".join(genre["name"] for genre in results["genres"])]
                 continue
             if choices[selected] == 'Extras':
                 extra(anime)
@@ -230,7 +77,8 @@ def main():
                 reset_watched(anime)
                 continue
             if choices[selected] == 'Exit':
-                return run('anime')
+                sys.argv = [sys.argv[0]]
+                return main() 
             play(anime,choices,selected)
     
 if __name__ == '__main__':
