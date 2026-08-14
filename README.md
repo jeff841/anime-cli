@@ -1,87 +1,55 @@
+# anime-cli
 
-# Anime Player
+A terminal-based anime manager and player for organizing and watching anime episodes.
 
-A cross-platform terminal-based anime player written in Python. It provides a curses interface for browsing your anime library, launches episodes in VLC, automatically tracks watched episodes, and includes a built-in episode renamer.
+`anime-cli` can organize episode files into the structure expected by the application, search MyAnimeList for anime information, and launch episodes through VLC.
 
 ## Features
 
-* Browse your anime library through a terminal interface.
-* Select your anime library by:
-
-  * entering the path manually, or
-  * choosing a directory through a graphical folder picker.
-* Remembers your selected library between launches.
-* Change the anime library at any time from the main menu.
-* Browse episodes in numerical order.
-* Supports episodes (`ep`), openings (`op`), endings (`ed`), and an optional `Extras` folder.
-* Plays episodes in **VLC** fullscreen.
-* Automatically continues through episodes.
-* Automatically marks watched episodes.
-* Reset watched status.
-* Built-in episode renamer.
-* Cross-platform support for Linux, Windows, and macOS.
-* Installable as the `anime` terminal command.
+* Browse your anime collection from the terminal.
+* Play episodes using VLC.
+* Keep track of watched episodes.
+* Automatically organize episode filenames.
+* Rename an existing series directory with `--rename`.
+* Search MyAnimeList for anime information.
+* Store application configuration outside the project directory.
+* Terminal interface using `curses`.
 
 ## Requirements
 
-* Python 3.10+
-* VLC installed and available in your system `PATH`
-* A terminal that supports the application interface
+* Python 3.10 or newer
+* VLC
+* A MyAnimeList API Client ID for MAL-related features
+
+VLC must be available as an executable on your system.
+
+### Linux
+
+Install VLC using your distribution's package manager. On Arch Linux:
+
+```bash
+sudo pacman -S vlc
+```
 
 ### Windows
 
-The application requires the `windows-curses` package automatically when installed on Windows.
+Install VLC and make sure its executable is available to the application.
 
 ## Installation
 
-### Using pipx (recommended)
-
-Install pipx:
-
-#### Arch Linux
+Install the package from a built wheel:
 
 ```bash
-sudo pacman -S python-pipx
+pip install anime_cli-0.1.0-py3-none-any.whl
 ```
 
-Enable pipx:
+Or install the project locally:
 
 ```bash
-pipx ensurepath
+pip install .
 ```
 
-Restart your terminal after running the command.
-
-Clone the repository:
-
-```bash
-git clone https://github.com/jeff841/anime-cli.git
-cd anime-cli
-```
-
-Install:
-
-```bash
-pipx install .
-```
-
-Run:
-
-```bash
-anime
-```
-
-## Development Installation
-
-For development:
-
-```bash
-python -m venv .venv
-source .venv/bin/activate
-pip install -e .
-```
-
-Run:
+After installation, the `anime` command is available:
 
 ```bash
 anime
@@ -89,170 +57,195 @@ anime
 
 ## Usage
 
-Start the player:
+### Open the anime menu
 
 ```bash
 anime
 ```
 
-On the first launch, the application asks for your anime library location.
+This opens the main menu where you can browse your configured anime directory.
 
-You can either:
+### Open an anime directly
 
-* type the directory path manually, or
-* select it using the graphical folder picker.
-
-The selected directory is saved automatically and reused on future launches.
-
-Example library:
-
-```text
-Anime/
-├── Frieren/
-├── Vinland Saga/
-├── Bocchi the Rock/
-└── Steins;Gate/
+```bash
+anime "anime name"
 ```
 
-Choose:
+For example:
 
-```text
-Change anime directory
+```bash
+anime nisekoi
 ```
 
-from the menu to select a different library.
+### Play an episode
+
+An episode can be selected through the anime menu or specified after the anime name:
+
+```bash
+anime nisekoi ep1
+```
+
+The exact episode selection depends on the episode files in the series directory.
+
+## Directory Structure
+
+`anime-cli` expects your anime collection to be organized approximately like this:
+
+```text
+anime/
+├── Nisekoi/
+│   ├── ep1-...
+│   ├── ep2-...
+│   └── ep3-...
+│
+├── Naruto/
+│   ├── ep1-...
+│   ├── ep2-...
+│   └── ep3-...
+│
+└── One Piece/
+    ├── ep1-...
+    ├── ep2-...
+    └── ep3-...
+```
+
+The directory selected in the application should contain the **series folders**, rather than being a single series folder.
+
+## Renaming Episodes
+
+If your episodes aren't using the naming structure expected by `anime-cli`, use:
+
+```bash
+anime --rename
+```
+
+This opens a menu allowing you to:
+
+1. Enter a directory path.
+2. Select a directory using a file explorer.
+3. Exit.
+
+You can also provide the directory directly:
+
+```bash
+anime --rename /path/to/anime
+```
+
+For example:
+
+```bash
+anime --rename ~/Downloads/Nisekoi
+```
+
+The renamer converts the files into the episode naming scheme used by the application.
+
+> Make sure you have a backup if the directory contains files you don't want renamed.
 
 ## Configuration
 
-The application stores user configuration using the operating system's standard configuration directory.
+Application configuration is stored in the user's configuration directory rather than inside the project.
 
-Examples:
+The application creates its configuration directory automatically when needed.
 
-Linux:
+Configuration includes information such as the location of your anime collection.
 
-```text
-~/.config/anime/directory.json
+The configuration is conceptually structured like:
+
+```json
+{
+    "anime_list": "/path/to/your/anime"
+}
 ```
 
-Windows:
+Do not manually commit your personal configuration files to the repository.
 
-```text
-C:\Users\<username>\AppData\Local\anime\directory.json
+## MyAnimeList API
+
+Some functionality uses the MyAnimeList API.
+
+## Cache
+
+The application may maintain a local cache database.
+
+The cache is runtime data and should not be committed to the repository.
+
+For example:
+
+```gitignore
+*.db
 ```
 
-macOS:
+A user's cache can be recreated when necessary.
 
-```text
-~/Library/Application Support/anime/directory.json
-```
+## Development
 
-## Episode Naming
-
-The built-in renamer converts files into the naming format used by the player.
-
-Run:
+Clone the repository and create a virtual environment:
 
 ```bash
-anime rename /path/to/series
+git clone https://github.com/jeff841/anime-cli
+cd anime-cli
+
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Example:
+Install the project in editable mode:
 
-Before:
+```bash
+pip install -e .
+```
+
+This allows changes to the source code to be tested without rebuilding the package after every change.
+
+## Building
+
+Install the Python build frontend:
+
+```bash
+python -m pip install build
+```
+
+Build the package:
+
+```bash
+python -m build
+```
+
+This creates the distribution files in `dist/`:
 
 ```text
-Episode 1.mkv
-Episode 2.mkv
-Episode 3.mkv
+dist/
+├── anime_cli-0.1.0-py3-none-any.whl
+└── anime_cli-0.1.0.tar.gz
 ```
 
-After:
+Test the wheel in a clean environment before publishing:
 
-```text
-ep1-
-ep2-
-ep3-
+```bash
+python -m venv /tmp/anime-test
+source /tmp/anime-test/bin/activate
+pip install dist/*.whl
+anime --help
 ```
 
-The player uses these names to sort episodes correctly.
+## Git
 
-Openings and endings are also supported:
+Generated files and local configuration should not be committed.
 
-```text
-op1-
-ed1-
+A suitable `.gitignore` includes:
+
+```gitignore
+.venv/
+__pycache__/
+*.py[cod]
+build/
+dist/
+*.egg-info/
+*.db
+.env
 ```
 
-## Episode Ordering
-
-Episodes are sorted numerically instead of alphabetically.
-
-Example:
-
-Correct:
-
-```text
-ep1-
-ep2-
-ep3-
-ep10-
-ep11-
-```
-
-instead of:
-
-```text
-ep1-
-ep10-
-ep11-
-ep2-
-```
-
-## Watched Episodes
-
-After an episode finishes playing, it is automatically marked as watched.
-
-Example:
-
-Before:
-
-```text
-ep5-
-```
-
-After:
-
-```text
-ep5-watched
-```
-
-Watched status can be removed using:
-
-```text
-Reset watched status
-```
-
-## Extras
-
-Series can contain an `Extras` directory.
-
-Example:
-
-```text
-Frieren/
-├── ep1-
-├── ep2-
-└── Extras/
-    ├── op1-
-    └── ed1-
-```
-
-Extras support:
-
-* episode sorting
-* VLC playback
-* watched tracking
-* resetting watched status
+Source code, `pyproject.toml`, documentation, and other files required to build and distribute the application should be committed.
 
 ## Project Structure
 
@@ -261,15 +254,26 @@ anime-cli/
 ├── anime/
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── main.py
+│   ├── api.py
 │   ├── cli.py
-│   └── renamer.py
-├── pyproject.toml
+│   ├── episode.py
+│   ├── extra.py
+│   ├── kitty.py
+│   ├── main.py
+│   ├── picture.py
+│   ├── play.py
+│   ├── renamer.py
+│   ├── reset_watched.py
+│   ├── show.py
+│   └── watch_input.py
 ├── README.md
+├── pyproject.toml
 └── .gitignore
 ```
 
-## License
+## Status
 
-This project is licensed under the MIT License.
+`anime-cli` is currently in early development.
+
+The `0.1.0` release should be considered an initial release while the application interface and features continue to mature.
 
