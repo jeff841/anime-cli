@@ -19,7 +19,6 @@ A terminal-based anime manager and player for organizing and watching anime epis
 
 * Python 3.10 or newer
 * VLC
-* A MyAnimeList API Client ID for MAL-related features
 
 VLC must be available as an executable on your system.
 
