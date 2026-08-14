@@ -15,6 +15,7 @@ def kitty_available():
 
 def menu(stdscr, choices, items=None, picture=None):
     current = 0
+    offset = 0
     height, width = stdscr.getmaxyx()
     if width < MENU_WIDTH + 35:
         stdscr.addstr(
@@ -49,51 +50,60 @@ def menu(stdscr, choices, items=None, picture=None):
                 break
     y += 1
     menu_start = y
-    for i, option in enumerate(choices):
-        row = menu_start + i
-        if row >= height:
-            break
-        text = (
-            f"> {option}"
-            if i == current
-            else f"  {option}"
-        )
-        win.addstr(
-            row,
-            0,
-            text[:MENU_WIDTH - 1]
-        )
-    win.refresh()
+    visible = height - menu_start
+    if visible <= 0:
+        return 0
+    def draw_menu():
+        win.erase()
+        y = 0
+        if items:
+            for item in items:
+                lines = wrap(str(item), MENU_WIDTH - 1)
+                for line in lines:
+                    if y >= menu_start:
+                        break
+                    win.addstr(
+                        y,
+                        0,
+                        line[:MENU_WIDTH - 1]
+                    )
+                    y += 1
+                if y >= menu_start:
+                    break
+        for row in range(visible):
+            index = offset + row
+            if index >= len(choices):
+                break
+            text = (
+                f"> {choices[index]}"
+                if index == current
+                else f"  {choices[index]}"
+            )
+            win.addstr(
+                menu_start + row,
+                0,
+                text[:MENU_WIDTH - 1]
+            )
+        win.refresh()
+    draw_menu()
     if picture and kitty_available():
         show_image(
             picture,
-            x=60,
-            y=2,
+            x=IMAGE_X,
+            y=IMAGE_Y,
         )
     while True:
         key = win.getch()
         if key == KEY_UP:
-            old = current
             current = (current - 1) % len(choices)
         elif key == KEY_DOWN:
-            old = current
             current = (current + 1) % len(choices)
         elif key in (KEY_ENTER, 10, 13):
             return current
         else:
             continue
-        old_row = menu_start + old
-        if old_row < height:
-            win.addstr(
-                old_row,
-                0,
-                f"  {choices[old]}"[:MENU_WIDTH - 1]
-            )
-        new_row = menu_start + current
-        if new_row < height:
-            win.addstr(
-                new_row,
-                0,
-                f"> {choices[current]}"[:MENU_WIDTH - 1]
-            )
-        win.refresh()
+        if current >= offset + visible:
+            offset = current - visible + 1
+        elif current < offset:
+            offset = current
+        draw_menu()

@@ -56,7 +56,7 @@ def main():
                 metadata = load(f)
             results = api.get_anime(metadata["id"])
             picture = get_picture(results["id"],results["main_picture"]["large"])
-            items = [results["title"],results["synopsis"],", ".join(genre["name"] for genre in results["genres"])]
+            items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
         while True:
             choices = show(anime)
             selected = wrapper(menu,choices,items,picture)
@@ -66,12 +66,12 @@ def main():
                 choices2 = [anime["title"] for anime in data]
                 selected2 = wrapper(menu,choices2)
                 anime_id = data[selected2]["id"]
-                metadata_file = anime/"anime.json"
+                metadata_file = anime/METADATA
                 with metadata_file.open('w') as f:
                     dump({"id": anime_id},f)
                 results = api.get_anime(anime_id)
                 picture = get_picture(results["id"],results["main_picture"]["large"])
-                items = [results["title"], results["synopsis"],", ".join(genre["name"] for genre in results["genres"])]
+                items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
                 continue
             if choices[selected] == 'Extras':
                 extra(anime)

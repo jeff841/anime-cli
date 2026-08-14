@@ -9,7 +9,7 @@ A terminal-based anime manager and player for organizing and watching anime epis
 * Browse your anime collection from the terminal.
 * Play episodes using VLC.
 * Keep track of watched episodes.
-* Automatically organize episode filenames.
+* Organize episode filenames.
 * Rename an existing series directory with `--rename`.
 * Search MyAnimeList for anime information.
 * Store application configuration outside the project directory.
@@ -19,40 +19,66 @@ A terminal-based anime manager and player for organizing and watching anime epis
 
 * Python 3.10 or newer
 * VLC
+* `pipx`
+* A MyAnimeList API connection for MAL-related features
 
 VLC must be available as an executable on your system.
 
 ### Linux
 
-Install VLC using your distribution's package manager. On Arch Linux:
+On Arch Linux:
 
 ```bash
-sudo pacman -S vlc
+sudo pacman -S vlc python-pipx
 ```
+
+Then make sure `pipx` applications are available on your `PATH`:
+
+```bash
+pipx ensurepath
+```
+
+Restart your shell after running `pipx ensurepath`.
 
 ### Windows
 
-Install VLC and make sure its executable is available to the application.
+Install Python, VLC, and `pipx`. Make sure both Python and VLC are available to the application.
 
 ## Installation
 
-Install the package from a built wheel:
+`anime-cli` is installed with `pipx`, which keeps the application's Python dependencies isolated while making the `anime` command available globally.
+
+### From PyPI
+
+Once the package is published:
 
 ```bash
-pip install anime_cli-0.1.0-py3-none-any.whl
+pipx install anime-cli
 ```
 
-Or install the project locally:
-
-```bash
-pip install .
-```
-
-After installation, the `anime` command is available:
+After installation, run:
 
 ```bash
 anime
 ```
+
+The command works regardless of your current directory.
+
+### From a local wheel
+
+To install a locally built version:
+
+```bash
+pipx install ./dist/anime_cli-0.1.0-py3-none-any.whl
+```
+
+You can then use:
+
+```bash
+anime
+```
+
+from any directory.
 
 ## Usage
 
@@ -84,8 +110,6 @@ An episode can be selected through the anime menu or specified after the anime n
 anime nisekoi ep1
 ```
 
-The exact episode selection depends on the episode files in the series directory.
-
 ## Directory Structure
 
 `anime-cli` expects your anime collection to be organized approximately like this:
@@ -108,7 +132,7 @@ anime/
     └── ep3-...
 ```
 
-The directory selected in the application should contain the **series folders**, rather than being a single series folder.
+The configured directory should contain the **series folders**, rather than being a single series folder.
 
 ## Renaming Episodes
 
@@ -146,9 +170,7 @@ Application configuration is stored in the user's configuration directory rather
 
 The application creates its configuration directory automatically when needed.
 
-Configuration includes information such as the location of your anime collection.
-
-The configuration is conceptually structured like:
+The configured anime directory is stored in a structure similar to:
 
 ```json
 {
@@ -156,34 +178,64 @@ The configuration is conceptually structured like:
 }
 ```
 
-Do not manually commit your personal configuration files to the repository.
+Personal configuration files should not be committed to the project repository.
 
-## MyAnimeList API
+## MyAnimeList
 
-Some functionality uses the MyAnimeList API.
+`anime-cli` uses the MyAnimeList API for anime information.
+
+API configuration is handled by the application. Users should not need to commit or distribute API credentials.
+
+If local credentials are required by a development installation, store them in a local `.env` file:
+
+```env
+MAL_CLIENT_ID=your_client_id
+```
+
+Never commit `.env` or other credentials to Git.
 
 ## Cache
 
-The application may maintain a local cache database.
+`anime-cli` may maintain a local cache database.
 
-The cache is runtime data and should not be committed to the repository.
+The cache contains runtime data and should not be committed to the repository.
 
-For example:
+For example, a Git repository should ignore:
 
 ```gitignore
 *.db
 ```
 
-A user's cache can be recreated when necessary.
+## Updating
+
+If `anime-cli` was installed with `pipx`, update it with:
+
+```bash
+pipx upgrade anime-cli
+```
+
+If a new release is available on PyPI, `pipx` will install the updated version.
+
+## Uninstalling
+
+To remove `anime-cli`:
+
+```bash
+pipx uninstall anime-cli
+```
 
 ## Development
 
-Clone the repository and create a virtual environment:
+Clone the repository:
 
 ```bash
 git clone https://github.com/jeff841/anime-cli
 cd anime-cli
+```
 
+Create a development virtual environment:
+
+```bash
 python -m venv .venv
 source .venv/bin/activate
 ```
@@ -218,13 +270,27 @@ dist/
 └── anime_cli-0.1.0.tar.gz
 ```
 
-Test the wheel in a clean environment before publishing:
+### Test the built wheel with pipx
+
+You can test the exact wheel that will be distributed:
 
 ```bash
-python -m venv /tmp/anime-test
-source /tmp/anime-test/bin/activate
-pip install dist/*.whl
+pipx install ./dist/anime_cli-0.1.0-py3-none-any.whl
+```
+
+Then test the application from outside the repository:
+
+```bash
+cd ~
 anime --help
+```
+
+This verifies that the installed package works independently of the source directory.
+
+If the package is already installed, reinstall the newly built wheel:
+
+```bash
+pipx reinstall ./dist/anime_cli-0.1.0-py3-none-any.whl
 ```
 
 ## Git
@@ -270,9 +336,13 @@ anime-cli/
 └── .gitignore
 ```
 
+## License
+
+Add your chosen license here before publishing the project.
+
 ## Status
 
 `anime-cli` is currently in early development.
 
-The `0.1.0` release should be considered an initial release while the application interface and features continue to mature.
+The `0.1.0` release is an initial release while the application's interface and features continue to mature.
 
