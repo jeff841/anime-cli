@@ -1,5 +1,5 @@
 import curses
-from curses import KEY_UP, KEY_DOWN, KEY_ENTER
+from curses import BUTTON1_CLICKED, BUTTON5_PRESSED, KEY_MOUSE, KEY_UP, KEY_DOWN, KEY_ENTER, getmouse,mousemask,ALL_MOUSE_EVENTS,REPORT_MOUSE_POSITION,curs_set, BUTTON4_PRESSED
 from textwrap import wrap
 import os
 import shutil
@@ -14,6 +14,8 @@ def kitty_available():
     return os.name != "nt" and shutil.which("kitty") is not None
 
 def menu(stdscr, choices, items=None, picture=None):
+    curs_set(0)
+    mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION)
     current = 0
     offset = 0
     height, width = stdscr.getmaxyx()
@@ -98,6 +100,16 @@ def menu(stdscr, choices, items=None, picture=None):
             current = (current - 1) % len(choices)
         elif key == KEY_DOWN:
             current = (current + 1) % len(choices)
+        elif key == KEY_MOUSE:
+            _,x,y,_,button_state = getmouse()
+            if button_state & BUTTON1_CLICKED:
+                index = offset + (y - menu_start)
+                if 0 <= index < len(choices):
+                    current = index
+            if button_state & BUTTON4_PRESSED:
+                current = max(0,current - 1)
+            elif button_state & BUTTON5_PRESSED:
+                current = min(len(choices) - 1, current + 1)
         elif key in (KEY_ENTER, 10, 13):
             return current
         else:
