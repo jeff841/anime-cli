@@ -1,5 +1,8 @@
+from .constants import METADATA
+
+
 def show(anime):
-    episodes = [ep.name for ep in anime.iterdir() if ep.name != "anime.json"]
+    episodes = [ep.name for ep in anime.iterdir() if ep.name != METADATA]
     episodes.append("Get anime information")
     episodes.sort(
             key=lambda name: (

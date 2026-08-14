@@ -1,10 +1,11 @@
 from shutil import which
 from subprocess import run
+from .constants import VLC_ERROR
 
 def play(directory,episodes,index):
     VLC = which('vlc') or which('vlc.exe')
     if VLC is None:
-        raise RuntimeError("VLC is not installed or is not in PATH")
+        raise RuntimeError(VLC_ERROR)
     while index < len(episodes):
         if directory is not None:
             episode = directory/episodes[index]

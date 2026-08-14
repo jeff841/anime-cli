@@ -3,9 +3,10 @@ from curses import wrapper
 from .cli import menu
 from subprocess import run
 from .reset_watched import reset_watched
+from .constants import EXTRAS
 
 def extra(directory):
-    directory_extra = directory/'Extras'
+    directory_extra = directory/EXTRAS
     episodes_extra = show(directory_extra)
     index_extra = wrapper(menu,episodes_extra)
     while index_extra < len(episodes_extra):

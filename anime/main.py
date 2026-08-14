@@ -14,12 +14,13 @@ from .extra import extra
 from .episode import episode
 import sys
 from pathlib import Path
+from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
 
 def main():
-    parser = ArgumentParser(description="Manage and watch your anime!")
-    parser.add_argument("anime_name",type=str,nargs='?',help="Name of the anime you want to watch")
-    parser.add_argument("ep",nargs='?',type=str,help="Episode you want to watch (e.g. ep1, ep2, ep10)")
-    parser.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help="Command to rename the episodes in your series folder so it fits the application structure (e.g. anime --rename /path/to/your/selected/directory, or just anime --rename to open selection screen. Do not be dumb enough to run this in a non-episodes folder, it'll be hard to fix)")
+    parser = ArgumentParser(description=PARSER_DESCRIPTION)
+    parser.add_argument("anime_name",type=str,nargs='?',help=ANINAME_HELP)
+    parser.add_argument("ep",nargs='?',type=str,help=EP_HELP)
+    parser.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help=RENAME_HELP)
     args = parser.parse_args() 
     if args.rename is not None:
         if args.rename == Path('menu'):
@@ -28,7 +29,7 @@ def main():
             rename_sort(args.rename)
         return
     elif args.ep is not None and args.anime_name is None:
-       parser.error("Please provide an anime to play")
+       parser.error(EP_ERROR)
     elif args.ep:
         ep = episode(args.ep)
         anime = watch_input(args.anime_name)
@@ -45,10 +46,10 @@ def main():
         anime = watch_input(args.anime_name)
         items = None
         picture = None
-        api = AnimeAPI("http://127.0.0.1:8000")
+        api = AnimeAPI(API_URL)
         if anime is None:
             return
-        metadata_file = anime/"anime.json"
+        metadata_file = anime/METADATA
         metadata_file.touch(exist_ok=True)
         if metadata_file.stat().st_size > 0:
             with metadata_file.open() as f:

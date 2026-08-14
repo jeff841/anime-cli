@@ -4,6 +4,7 @@ from textwrap import wrap
 import os
 import shutil
 from .kitty import show_image
+from .constants import TERMINAL_NARROW
 
 MENU_WIDTH = 55
 IMAGE_X = 60
@@ -19,7 +20,7 @@ def menu(stdscr, choices, items=None, picture=None):
         stdscr.addstr(
             0,
             0,
-            "Terminal is too narrow."
+            TERMINAL_NARROW
         )
         stdscr.refresh()
         stdscr.getch()
