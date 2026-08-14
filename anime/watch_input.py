@@ -16,15 +16,28 @@ def watch_input(anime_name=None):
             choicesd = ["Enter the directory where your series folders are located","Open file explorer","Exit"]
             selectedd = wrapper(menu,choicesd)
             if choicesd[selectedd] == 'Enter the directory where your series folders are located':
-                while True:                
+                while True:
                     inp = input("Directory: ").strip()
-                    d = Path(inp)
-                    if d.is_dir():
-                        for cont in d.iterdir():
-                            if not cont.is_dir():
-                                print("Select the directory in which you store your series folders. The structure should be: \n./\n    anime1/\n        ep1-\n        ep2-\n        ...\n    anime2/\n        ep1-\n        ep2-\n        ...")
-                                return watch_input()
-                    print("This directory does not exist")
+                    d = Path(inp).expanduser()
+                    if not d.is_dir():
+                        print("This directory does not exist.")
+                        continue
+                    if not all(cont.is_dir() for cont in d.iterdir()):
+                        print(
+                            "Select the directory in which you store your series folders.\n"
+                            "The structure should be:\n"
+                            "./\n"
+                            "    anime1/\n"
+                            "        ep1-\n"
+                            "        ep2-\n"
+                            "        ...\n"
+                            "    anime2/\n"
+                            "        ep1-\n"
+                            "        ep2-\n"
+                            "        ..."
+                        )
+                        continue
+                    break
             elif choicesd[selectedd] == 'Open file explorer':
                 root = Tk()
                 root.withdraw()

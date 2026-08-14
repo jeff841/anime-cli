@@ -13,15 +13,16 @@ from .reset_watched import reset_watched
 from .extra import extra
 from .episode import episode
 import sys
+from pathlib import Path
 
 def main():
     parser = ArgumentParser(description="Manage and watch your anime!")
     parser.add_argument("anime_name",type=str,nargs='?',help="Name of the anime you want to watch")
     parser.add_argument("ep",nargs='?',type=str,help="Episode you want to watch (e.g. ep1, ep2, ep10)")
-    parser.add_argument("--rename",nargs='?',const='menu',type=episode,help="Command to rename the episodes in your series folder so it fits the application structure (e.g. anime --rename /path/to/your/selected/directory, or just anime --rename to open selection screen)")
+    parser.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help="Command to rename the episodes in your series folder so it fits the application structure (e.g. anime --rename /path/to/your/selected/directory, or just anime --rename to open selection screen. Do not be dumb enough to run this in a non-episodes folder, it'll be hard to fix)")
     args = parser.parse_args() 
     if args.rename is not None:
-        if args.rename == 'menu':
+        if args.rename == Path('menu'):
             rename()
         else:
             rename_sort(args.rename)
