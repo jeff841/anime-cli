@@ -1,5 +1,6 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+import re
 import shlex
 
 from .menu_result import MenuResult
@@ -9,6 +10,7 @@ from .menu_result import MenuResult
 class MenuContext:
     choices: Sequence[str]
     selected: int
+    screen: str = "generic"
 
 
 CommandHandler = Callable[[list[str], MenuContext], MenuResult | None]
@@ -46,6 +48,64 @@ def quit_command(arguments, _context):
     return MenuResult(command="quit")
 
 
+def episode_index(choices, episode):
+    """Return the index for an episode such as ``ep12``."""
+    match = re.fullmatch(r"ep(\d+)", episode.casefold())
+    if match is None:
+        return None
+    number = match.group(1)
+    for index, choice in enumerate(choices):
+        if re.match(rf"ep{number}(?:-|$)", choice, flags=re.IGNORECASE):
+            return index
+    return None
+
+
+def first_unwatched_episode(choices):
+    """Return the first episode entry that has not received the watched suffix."""
+    for index, choice in enumerate(choices):
+        if re.match(r"ep\d+(?:-|$)", choice, flags=re.IGNORECASE) and not choice.endswith("watched"):
+            return index
+    return None
+
+
+def play_command(arguments, context):
+    """Build a play action appropriate for the menu that received the command."""
+    if context.screen == "anime":
+        if not arguments:
+            return None
+
+        episode = None
+        if re.fullmatch(r"ep\d+", arguments[-1], flags=re.IGNORECASE):
+            episode = arguments[-1]
+            arguments = arguments[:-1]
+        if not arguments:
+            return None
+
+        anime_name = " ".join(arguments)
+        for selected, choice in enumerate(context.choices):
+            if choice.casefold() == anime_name.casefold():
+                return MenuResult(
+                    selected=selected,
+                    command="play",
+                    arguments=(episode,) if episode else (),
+                )
+        return None
+
+    if context.screen == "episode":
+        if len(arguments) > 1:
+            return None
+        selected = (
+            episode_index(context.choices, arguments[0])
+            if arguments
+            else first_unwatched_episode(context.choices)
+        )
+        if selected is None:
+            return None
+        return MenuResult(selected=selected, command="play")
+
+    return None
+
+
 def command_registry(*commands):
     return {
         alias.casefold(): command
@@ -56,6 +116,7 @@ def command_registry(*commands):
 
 COMMANDS = command_registry(
     Command("open", open_command, aliases=("o",)),
+    Command("play", play_command, aliases=("p",)),
     Command("quit", quit_command, aliases=("q",)),
 )
 

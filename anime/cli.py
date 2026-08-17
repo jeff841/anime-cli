@@ -30,7 +30,7 @@ def command_line(win, height):
 def kitty_available():
     return os.name != "nt" and shutil.which("kitty") is not None
 
-def menu(stdscr, choices, items=None, picture=None):
+def menu(stdscr, choices, items=None, picture=None, screen="generic"):
     curs_set(0)
     mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION)
     current = 0
@@ -131,7 +131,7 @@ def menu(stdscr, choices, items=None, picture=None):
             return MenuResult(selected=current)
         elif key == ord(":"):
             command = command_line(win, height)
-            result = run_command(command, MenuContext(choices, current))
+            result = run_command(command, MenuContext(choices, current, screen))
             if result is not None:
                 return result
             draw_menu()

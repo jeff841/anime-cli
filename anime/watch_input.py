@@ -2,7 +2,10 @@ from pathlib import Path
 from platformdirs import user_config_dir
 from os import path
 from .constants import CONFIG,ANIME_DIR,NOT_DIR,EXPLORER_DIR,DIR_STRUCTURE
+from .commands import episode_index, first_unwatched_episode
 from .cli import menu
+from .play import play
+from .show import show
 from curses import wrapper
 from tkinter import Tk,filedialog
 from json import dump,load
@@ -55,9 +58,20 @@ def watch_input(anime_name=None):
         choices = [element.name for element in directory.iterdir()]
         choices.append('Change anime directory')
         choices.append('Exit')
-        result = wrapper(menu,choices)
+        result = wrapper(menu, choices, screen="anime")
         if result.command == 'quit' or result.selected is None:
             return
+        if result.command == 'play':
+            anime = directory / choices[result.selected]
+            episodes = show(anime)
+            selected_episode = (
+                episode_index(episodes, result.arguments[0])
+                if result.arguments
+                else first_unwatched_episode(episodes)
+            )
+            if selected_episode is not None:
+                play(anime, episodes, selected_episode)
+            return watch_input()
         if choices[result.selected] == 'Change anime directory':
             CONFIG_FILE.write_text('')
             return watch_input()

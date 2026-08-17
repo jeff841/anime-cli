@@ -95,8 +95,13 @@ This opens the main menu where you can browse your configured anime directory.
 Press `:` in a menu to open its internal command line. The following commands
 are currently available:
 
-* `open <entry>` — open an entry by its one-based menu number or exact name;
+* `open <entry>` (or `o`) — open an entry by its one-based menu number or exact name;
   for example, `open 2` or `open Nisekoi`.
+* `play <anime> [episode]` (or `p`) — from the anime-selection menu, play an
+  anime from its first unwatched episode, or from an optional episode such as
+  `ep3`. For example: `play Nisekoi ep3`.
+* `play [episode]` (or `p`) — from an episode-selection menu, play the current
+  anime from its first unwatched episode, or from the specified episode.
 * `quit` (or `q`) — exit `anime-cli`.
 
 ### Open an anime directly

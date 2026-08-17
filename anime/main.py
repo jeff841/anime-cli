@@ -59,10 +59,13 @@ def main():
             items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
         while True:
             choices = show(anime)
-            result = wrapper(menu,choices,items,picture)
+            result = wrapper(menu, choices, items, picture, screen="episode")
             if result.command == 'quit':
                 return
             if result.selected is None:
+                continue
+            if result.command == 'play':
+                play(anime, choices, result.selected)
                 continue
             if choices[result.selected] == 'Get anime information':
                 query = input("Enter anime name: ").strip().lower()
@@ -94,7 +97,6 @@ def main():
     
 if __name__ == '__main__':
     main()
-
 
 
 
