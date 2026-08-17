@@ -1,5 +1,6 @@
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass
+import os
 import re
 import shlex
 
@@ -88,7 +89,8 @@ def play_command(arguments, context):
             return None
 
         anime_name = " ".join(arguments)
-        for selected, choice in enumerate(context.choices):
+        targets = context.targets if context.targets is not None else context.choices
+        for selected, choice in enumerate(targets):
             if choice.casefold() == anime_name.casefold():
                 return MenuResult(
                     selected=selected,
@@ -112,6 +114,63 @@ def play_command(arguments, context):
     return None
 
 
+def rename_command(arguments, context):
+    """Build a rename action for a named or currently open anime series."""
+    if context.screen == "anime":
+        if not arguments:
+            return None
+        anime_name = " ".join(arguments)
+        targets = context.targets if context.targets is not None else context.choices
+        for selected, choice in enumerate(targets):
+            if choice.casefold() == anime_name.casefold():
+                return MenuResult(
+                    selected=selected,
+                    command="rename_anime",
+                    arguments=(choice,),
+                )
+        return None
+
+    if context.screen == "episode":
+        if not arguments:
+            return MenuResult(command="rename_current")
+        anime_name = " ".join(arguments)
+        targets = context.targets if context.targets is not None else ()
+        for selected, choice in enumerate(targets):
+            if choice.casefold() == anime_name.casefold():
+                return MenuResult(
+                    selected=selected,
+                    command="rename_anime",
+                    arguments=(choice,),
+                )
+
+    return None
+
+
+def add_command(arguments, context):
+    """Build an add-series action from the anime-selection menu."""
+    if context.screen != "anime" or not arguments:
+        return None
+    return MenuResult(command="add_series", arguments=(" ".join(arguments),))
+
+
+def move_command(arguments, context):
+    """Build a move-series action from the anime-selection menu."""
+    if context.screen != "anime" or not arguments:
+        return None
+
+    targets = context.targets if context.targets is not None else context.choices
+    for split_at in range(len(arguments), 0, -1):
+        series_name = " ".join(arguments[:split_at])
+        for choice in targets:
+            if choice.casefold() == series_name.casefold():
+                destination = " ".join(arguments[split_at:])
+                return MenuResult(
+                    command="move_series",
+                    arguments=(choice, destination) if destination else (choice,),
+                )
+    return None
+
+
 def command_registry(*commands):
     return {
         alias.casefold(): command
@@ -123,6 +182,9 @@ def command_registry(*commands):
 COMMANDS = command_registry(
     Command("open", open_command, aliases=("o",)),
     Command("play", play_command, aliases=("p",)),
+    Command("rename", rename_command, aliases=("r",)),
+    Command("add", add_command, aliases=("a",)),
+    Command("move", move_command),
     Command("quit", quit_command, aliases=("q",)),
 )
 
@@ -130,9 +192,14 @@ COMMANDS = command_registry(
 def run_command(command_line, context):
     """Parse and dispatch a command-line entry through the command registry."""
     try:
-        parts = shlex.split(command_line)
+        parts = shlex.split(command_line, posix=os.name != "nt")
     except ValueError:
         return None
+    if os.name == "nt":
+        parts = [
+            part[1:-1] if part[:1] in {"'", '"'} and part[-1:] == part[:1] else part
+            for part in parts
+        ]
     if not parts:
         return None
 

@@ -4,11 +4,24 @@ from os import path
 from .constants import CONFIG,ANIME_DIR,NOT_DIR,EXPLORER_DIR,DIR_STRUCTURE
 from .commands import episode_index, first_unwatched_episode
 from .cli import menu
+from .collection import add_series, move_series
 from .play import play
+from .renamer import rename_sort
 from .show import show
 from curses import wrapper
 from tkinter import Tk,filedialog
 from json import dump,load
+
+
+def configured_anime_directory():
+    """Return the configured anime collection directory, if one exists."""
+    config_dir = Path(user_config_dir(CONFIG))
+    config_file = config_dir / ANIME_DIR
+    if not config_file.is_file() or config_file.stat().st_size == 0:
+        return None
+    with config_file.open() as f:
+        return Path(load(f)["anime_list"])
+
 
 def watch_input(anime_name=None):
     CONFIG_DIR = Path(user_config_dir(CONFIG))
@@ -55,11 +68,56 @@ def watch_input(anime_name=None):
             for series in directory.iterdir():
                 if series.name.lower() == anime_name.lower():
                     return series
-        choices = [element.name for element in directory.iterdir()]
+        anime_choices = [element.name for element in directory.iterdir() if element.is_dir()]
+        choices = anime_choices.copy()
+        choices.append('Add series')
         choices.append('Change anime directory')
         choices.append('Exit')
-        result = wrapper(menu, choices, screen="anime")
-        if result.command == 'quit' or result.selected is None:
+        result = wrapper(
+            menu,
+            choices,
+            screen="anime",
+            targets=anime_choices,
+            click_commands={'Add series': 'add_from_picker'},
+            button_start=len(anime_choices),
+        )
+        if result.command == 'quit':
+            return
+        if result.command == 'add_series':
+            try:
+                destination = add_series(result.arguments[0], directory)
+            except (ValueError, FileExistsError) as error:
+                print(error)
+            else:
+                print(f"Added {destination.name} to {directory}")
+            return watch_input()
+        if result.command == 'move_series':
+            try:
+                target = move_series(
+                    result.arguments[0],
+                    directory,
+                    result.arguments[1] if len(result.arguments) > 1 else None,
+                )
+            except (ValueError, FileExistsError) as error:
+                print(error)
+            else:
+                print(f"Moved {result.arguments[0]} to {target.parent}")
+            return watch_input()
+        if result.command == 'add_from_picker' or (
+            result.selected is not None and choices[result.selected] == 'Add series'
+        ):
+            root = Tk()
+            root.withdraw()
+            source = filedialog.askdirectory(title="Select series directory")
+            if source:
+                try:
+                    destination = add_series(source, directory)
+                except (ValueError, FileExistsError) as error:
+                    print(error)
+                else:
+                    print(f"Added {destination.name} to {directory}")
+            return watch_input()
+        if result.selected is None:
             return
         if result.command == 'play':
             anime = directory / choices[result.selected]
@@ -71,6 +129,9 @@ def watch_input(anime_name=None):
             )
             if selected_episode is not None:
                 play(anime, episodes, selected_episode)
+            return watch_input()
+        if result.command == 'rename_anime':
+            rename_sort(directory / result.arguments[0])
             return watch_input()
         if choices[result.selected] == 'Change anime directory':
             CONFIG_FILE.write_text('')

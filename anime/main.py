@@ -6,7 +6,8 @@ from argparse import ArgumentParser
 from .picture import get_picture
 from re import search
 from .api import AnimeAPI
-from .watch_input import watch_input
+from .watch_input import configured_anime_directory, watch_input
+from .collection import add_series, move_series
 from .show import show
 from .play import play
 from .reset_watched import reset_watched
@@ -36,13 +37,47 @@ def main():
     parser = ArgumentParser(description=PARSER_DESCRIPTION)
     parser.add_argument("anime_name",type=str,nargs='?',help=ANINAME_HELP)
     parser.add_argument("ep",nargs='?',type=str,help=EP_HELP)
-    parser.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help=RENAME_HELP)
+    actions = parser.add_mutually_exclusive_group()
+    actions.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help=RENAME_HELP)
+    actions.add_argument("--add", type=Path, metavar="DIRECTORY", help="Move a series directory into the configured anime collection")
+    actions.add_argument("--move", nargs='+', metavar="ARG", help="Move a collection series to [DESTINATION], defaulting to the home directory")
     args = parser.parse_args() 
     if args.rename is not None:
         if args.rename == Path('menu'):
             rename()
         else:
             rename_sort(args.rename)
+        return
+    if args.add is not None:
+        if args.anime_name is not None or args.ep is not None:
+            parser.error("--add cannot be used with an anime name or episode")
+        collection = configured_anime_directory()
+        if collection is None:
+            parser.error("Configure an anime directory before using --add")
+        try:
+            destination = add_series(args.add, collection)
+        except (ValueError, FileExistsError) as error:
+            parser.error(str(error))
+        print(f"Added {destination.name} to {collection}")
+        return
+    if args.move is not None:
+        if args.anime_name is not None or args.ep is not None:
+            parser.error("--move cannot be used with an anime name or episode")
+        if not 1 <= len(args.move) <= 2:
+            parser.error("--move requires SERIES and accepts at most one DESTINATION")
+        collection = configured_anime_directory()
+        if collection is None:
+            parser.error("Configure an anime directory before using --move")
+        series_name, *destination = args.move
+        try:
+            target = move_series(
+                series_name,
+                collection,
+                destination[0] if destination else None,
+            )
+        except (ValueError, FileExistsError) as error:
+            parser.error(str(error))
+        print(f"Moved {series_name} to {target.parent}")
         return
     elif args.ep is not None and args.anime_name is None:
        parser.error(EP_ERROR)
@@ -74,6 +109,7 @@ def main():
                 picture,
                 screen="episode",
                 targets=anime_choices,
+                button_start=choices.index('Get anime information'),
             )
             if result.command == 'quit':
                 return
@@ -88,6 +124,12 @@ def main():
             if result.command == 'open_anime':
                 anime = anime.parent / result.arguments[0]
                 metadata_file, items, picture = anime_details(anime, api)
+                continue
+            if result.command == 'rename_current':
+                rename_sort(anime)
+                continue
+            if result.command == 'rename_anime':
+                rename_sort(anime.parent / result.arguments[0])
                 continue
             if result.command == 'play':
                 play(anime, choices, result.selected)
@@ -122,9 +164,3 @@ def main():
     
 if __name__ == '__main__':
     main()
-
-
-
-
-
-

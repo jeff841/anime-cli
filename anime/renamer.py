@@ -3,7 +3,7 @@ from pathlib import Path
 from .cli import menu
 import tkinter as tk
 from tkinter import filedialog
-from .constants import EXPLORER_DIR,INV_DIR
+from .constants import EXPLORER_DIR,INV_DIR,METADATA
 
 def rename():
     choices = ['Enter directory path','Open file explorer','Exit']
@@ -27,7 +27,7 @@ def rename_sort(directory):
         return
     files = sorted(
             f for f in directory.iterdir()
-            if f.is_file()
+            if f.is_file() and f.name != METADATA
             )
     for count,file in enumerate(files,start=1):
         file.rename(directory/f"ep{count}-")        

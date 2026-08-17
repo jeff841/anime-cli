@@ -8,7 +8,11 @@ from .constants import EXTRAS
 def extra(directory):
     directory_extra = directory/EXTRAS
     episodes_extra = show(directory_extra)
-    result = wrapper(menu,episodes_extra)
+    result = wrapper(
+        menu,
+        episodes_extra,
+        button_start=episodes_extra.index('Get anime information'),
+    )
     if result.command == 'quit':
         return True
     if result.selected is None:

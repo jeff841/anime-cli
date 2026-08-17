@@ -30,7 +30,25 @@ def command_line(win, height):
 def kitty_available():
     return os.name != "nt" and shutil.which("kitty") is not None
 
-def menu(stdscr, choices, items=None, picture=None, screen="generic", targets=None):
+
+def menu_rows(choices, button_start):
+    """Build visible menu rows, including a separator before application actions."""
+    rows = list(range(len(choices)))
+    if button_start is not None and 0 < button_start < len(choices):
+        rows.insert(button_start, None)
+    return rows
+
+
+def menu(
+    stdscr,
+    choices,
+    items=None,
+    picture=None,
+    screen="generic",
+    targets=None,
+    click_commands=None,
+    button_start=None,
+):
     curs_set(0)
     mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION)
     current = 0
@@ -72,6 +90,7 @@ def menu(stdscr, choices, items=None, picture=None, screen="generic", targets=No
     visible = height - menu_start
     if visible <= 0:
         return MenuResult()
+    rows = menu_rows(choices, button_start)
     def draw_menu():
         win.erase()
         y = 0
@@ -90,9 +109,12 @@ def menu(stdscr, choices, items=None, picture=None, screen="generic", targets=No
                 if y >= menu_start:
                     break
         for row in range(visible):
-            index = offset + row
-            if index >= len(choices):
+            row_index = offset + row
+            if row_index >= len(rows):
                 break
+            index = rows[row_index]
+            if index is None:
+                continue
             text = (
                 f"> {choices[index]}"
                 if index == current
@@ -120,9 +142,13 @@ def menu(stdscr, choices, items=None, picture=None, screen="generic", targets=No
         elif key == KEY_MOUSE:
             _,x,y,_,button_state = getmouse()
             if button_state & BUTTON1_CLICKED:
-                index = offset + (y - menu_start)
-                if 0 <= index < len(choices):
+                row_index = offset + (y - menu_start)
+                index = rows[row_index] if 0 <= row_index < len(rows) else None
+                if index is not None:
                     current = index
+                    command = (click_commands or {}).get(choices[current])
+                    if command is not None:
+                        return MenuResult(command=command)
             if button_state & BUTTON4_PRESSED:
                 current = max(0,current - 1)
             elif button_state & BUTTON5_PRESSED:
@@ -137,8 +163,9 @@ def menu(stdscr, choices, items=None, picture=None, screen="generic", targets=No
             draw_menu()
         else:
             continue
-        if current >= offset + visible:
-            offset = current - visible + 1
-        elif current < offset:
-            offset = current
+        current_row = rows.index(current)
+        if current_row >= offset + visible:
+            offset = current_row - visible + 1
+        elif current_row < offset:
+            offset = current_row
         draw_menu()

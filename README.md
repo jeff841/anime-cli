@@ -103,6 +103,16 @@ are currently available:
   `ep3`. For example: `play Nisekoi ep3`.
 * `play [episode]` (or `p`) — from an episode-selection menu, play the current
   anime from its first unwatched episode, or from the specified episode.
+* `rename <anime>` — from the anime-selection menu, rename the named series'
+  episode files into the application naming structure.
+* `rename [anime]` — from an episode-selection menu, rename the current series'
+  files, or a named series elsewhere in the collection.
+* `add <directory>` — from the anime-selection menu, move a series directory
+  into the collection; quote the path when it contains spaces.
+  The **Add series** menu button opens a directory picker for the same action.
+* `move <anime> [destination]` — from the anime-selection menu, move a named
+  series out of the collection. When no destination is given, it moves to the
+  current user's home directory.
 * `quit` (or `q`) — exit `anime-cli` from the anime-selection menu, or return
   to that menu from an episode-selection menu.
 
@@ -124,6 +134,33 @@ An episode can be selected through the anime menu or specified after the anime n
 
 ```bash
 anime nisekoi ep1
+```
+
+### Add a series directory
+
+Move a series directory into the configured anime collection:
+
+```bash
+anime --add /path/to/Nisekoi
+```
+
+The source directory is moved rather than copied. The command will not overwrite
+an existing series with the same directory name.
+
+### Move a series out of the collection
+
+Move a configured series to a destination directory:
+
+```bash
+anime --move "Nisekoi" /path/to/destination
+```
+
+When the destination is omitted, the series is moved to your home directory. On
+Windows, this uses the current user's home folder and accepts standard Windows
+paths:
+
+```powershell
+anime --move "Nisekoi" "C:\Users\Jeff\Videos"
 ```
 
 ## Directory Structure
