@@ -7,11 +7,13 @@ from .constants import EXPLORER_DIR,INV_DIR
 
 def rename():
     choices = ['Enter directory path','Open file explorer','Exit']
-    selected = wrapper(menu,choices)
-    if choices[selected] == 'Enter directory path':
+    result = wrapper(menu,choices)
+    if result.command == 'quit' or result.selected is None:
+        return
+    if choices[result.selected] == 'Enter directory path':
         directory = Path(input('Enter the selected directory: '))
         rename_sort(directory)
-    elif choices[selected] == 'Open file explorer':
+    elif choices[result.selected] == 'Open file explorer':
         root = tk.Tk()
         root.withdraw()
         directory = Path(filedialog.askdirectory(title=EXPLORER_DIR))

@@ -15,8 +15,10 @@ def watch_input(anime_name=None):
     with CONFIG_FILE.open('r+') as f:
         if path.getsize(f.name) == 0:
             choicesd = ["Enter the directory where your series folders are located","Open file explorer","Exit"]
-            selectedd = wrapper(menu,choicesd)
-            if choicesd[selectedd] == 'Enter the directory where your series folders are located':
+            result = wrapper(menu,choicesd)
+            if result.command == 'quit' or result.selected is None:
+                return
+            if choicesd[result.selected] == 'Enter the directory where your series folders are located':
                 while True:
                     inp = input("Directory: ").strip()
                     d = Path(inp).expanduser()
@@ -27,7 +29,7 @@ def watch_input(anime_name=None):
                         print(DIR_STRUCTURE)
                         continue
                     break
-            elif choicesd[selectedd] == 'Open file explorer':
+            elif choicesd[result.selected] == 'Open file explorer':
                 root = Tk()
                 root.withdraw()
                 folder = filedialog.askdirectory(title=EXPLORER_DIR)
@@ -53,12 +55,13 @@ def watch_input(anime_name=None):
         choices = [element.name for element in directory.iterdir()]
         choices.append('Change anime directory')
         choices.append('Exit')
-        selected = wrapper(menu,choices)
-        if choices[selected] == 'Change anime directory':
+        result = wrapper(menu,choices)
+        if result.command == 'quit' or result.selected is None:
+            return
+        if choices[result.selected] == 'Change anime directory':
             CONFIG_FILE.write_text('')
             return watch_input()
-        elif choices[selected] == 'Exit':
+        elif choices[result.selected] == 'Exit':
             return
         else:
-            return Path(directory/choices[selected])
-
+            return Path(directory/choices[result.selected])

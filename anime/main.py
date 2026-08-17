@@ -59,13 +59,21 @@ def main():
             items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
         while True:
             choices = show(anime)
-            selected = wrapper(menu,choices,items,picture)
-            if choices[selected] == 'Get anime information':
+            result = wrapper(menu,choices,items,picture)
+            if result.command == 'quit':
+                return
+            if result.selected is None:
+                continue
+            if choices[result.selected] == 'Get anime information':
                 query = input("Enter anime name: ").strip().lower()
                 data = api.search_anime(query)
                 choices2 = [anime["title"] for anime in data]
-                selected2 = wrapper(menu,choices2)
-                anime_id = data[selected2]["id"]
+                result2 = wrapper(menu,choices2)
+                if result2.command == 'quit':
+                    return
+                if result2.selected is None:
+                    continue
+                anime_id = data[result2.selected]["id"]
                 metadata_file = anime/METADATA
                 with metadata_file.open('w') as f:
                     dump({"id": anime_id},f)
@@ -73,20 +81,19 @@ def main():
                 picture = get_picture(results["id"],results["main_picture"]["large"])
                 items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
                 continue
-            if choices[selected] == 'Extras':
-                extra(anime)
-            if choices[selected] == 'Reset watched status':
+            if choices[result.selected] == 'Extras':
+                if extra(anime):
+                    return
+            if choices[result.selected] == 'Reset watched status':
                 reset_watched(anime)
                 continue
-            if choices[selected] == 'Exit':
+            if choices[result.selected] == 'Exit':
                 sys.argv = [sys.argv[0]]
                 return main() 
-            play(anime,choices,selected)
+            play(anime,choices,result.selected)
     
 if __name__ == '__main__':
     main()
-
-
 
 
 

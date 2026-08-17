@@ -8,7 +8,12 @@ from .constants import EXTRAS
 def extra(directory):
     directory_extra = directory/EXTRAS
     episodes_extra = show(directory_extra)
-    index_extra = wrapper(menu,episodes_extra)
+    result = wrapper(menu,episodes_extra)
+    if result.command == 'quit':
+        return True
+    if result.selected is None:
+        return
+    index_extra = result.selected
     while index_extra < len(episodes_extra):
         episode = directory_extra/episodes_extra[index_extra]
         if episode.name.startswith(('ep','op','ed')):
@@ -21,4 +26,3 @@ def extra(directory):
         if episodes_extra[index_extra] == 'Exit':
             return
         index_extra += 1
-

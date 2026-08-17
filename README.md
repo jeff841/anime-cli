@@ -90,6 +90,15 @@ anime
 
 This opens the main menu where you can browse your configured anime directory.
 
+### Menu commands
+
+Press `:` in a menu to open its internal command line. The following commands
+are currently available:
+
+* `open <entry>` — open an entry by its one-based menu number or exact name;
+  for example, `open 2` or `open Nisekoi`.
+* `quit` (or `q`) — exit `anime-cli`.
+
 ### Open an anime directly
 
 ```bash
@@ -345,4 +354,3 @@ Add your chosen license here before publishing the project.
 `anime-cli` is currently in early development.
 
 The `0.1.0` release is an initial release while the application's interface and features continue to mature.
-
