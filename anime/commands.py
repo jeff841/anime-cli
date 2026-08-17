@@ -11,6 +11,7 @@ class MenuContext:
     choices: Sequence[str]
     selected: int
     screen: str = "generic"
+    targets: Sequence[str] | None = None
 
 
 CommandHandler = Callable[[list[str], MenuContext], MenuResult | None]
@@ -29,23 +30,28 @@ def open_command(arguments, context):
         return None
 
     entry = " ".join(arguments)
+    targets = context.targets if context.targets is not None else context.choices
+    command = "open_anime" if context.screen == "episode" and context.targets is not None else "open"
     if entry.isdigit():
         selected = int(entry) - 1
-        if 0 <= selected < len(context.choices):
-            return MenuResult(selected=selected, command="open")
+        if 0 <= selected < len(targets):
+            arguments = (targets[selected],) if command == "open_anime" else ()
+            return MenuResult(selected=selected, command=command, arguments=arguments)
         return None
 
-    for selected, choice in enumerate(context.choices):
+    for selected, choice in enumerate(targets):
         if choice.casefold() == entry.casefold():
-            return MenuResult(selected=selected, command="open")
+            arguments = (choice,) if command == "open_anime" else ()
+            return MenuResult(selected=selected, command=command, arguments=arguments)
     return None
 
 
 def quit_command(arguments, _context):
-    """Exit the application."""
+    """Exit the application, or return to the anime menu from an episode menu."""
     if arguments:
         return None
-    return MenuResult(command="quit")
+    command = "back" if _context.screen == "episode" else "quit"
+    return MenuResult(command=command)
 
 
 def episode_index(choices, episode):

@@ -16,6 +16,22 @@ import sys
 from pathlib import Path
 from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
 
+
+def anime_details(anime, api):
+    """Load the optional metadata used beside an anime's episode menu."""
+    metadata_file = anime / METADATA
+    metadata_file.touch(exist_ok=True)
+    if metadata_file.stat().st_size == 0:
+        return metadata_file, None, None
+
+    with metadata_file.open() as f:
+        metadata = load(f)
+    results = api.get_anime(metadata["id"])
+    picture = get_picture(results["id"], results["main_picture"]["large"])
+    items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
+    return metadata_file, items, picture
+
+
 def main():
     parser = ArgumentParser(description=PARSER_DESCRIPTION)
     parser.add_argument("anime_name",type=str,nargs='?',help=ANINAME_HELP)
@@ -44,25 +60,34 @@ def main():
             return
     else:
         anime = watch_input(args.anime_name)
-        items = None
-        picture = None
         api = AnimeAPI(API_URL)
         if anime is None:
             return
-        metadata_file = anime/METADATA
-        metadata_file.touch(exist_ok=True)
-        if metadata_file.stat().st_size > 0:
-            with metadata_file.open() as f:
-                metadata = load(f)
-            results = api.get_anime(metadata["id"])
-            picture = get_picture(results["id"],results["main_picture"]["large"])
-            items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
+        metadata_file, items, picture = anime_details(anime, api)
         while True:
             choices = show(anime)
-            result = wrapper(menu, choices, items, picture, screen="episode")
+            anime_choices = [entry.name for entry in anime.parent.iterdir() if entry.is_dir()]
+            result = wrapper(
+                menu,
+                choices,
+                items,
+                picture,
+                screen="episode",
+                targets=anime_choices,
+            )
             if result.command == 'quit':
                 return
+            if result.command == 'back':
+                anime = watch_input()
+                if anime is None:
+                    return
+                metadata_file, items, picture = anime_details(anime, api)
+                continue
             if result.selected is None:
+                continue
+            if result.command == 'open_anime':
+                anime = anime.parent / result.arguments[0]
+                metadata_file, items, picture = anime_details(anime, api)
                 continue
             if result.command == 'play':
                 play(anime, choices, result.selected)
@@ -97,8 +122,6 @@ def main():
     
 if __name__ == '__main__':
     main()
-
-
 
 
 
