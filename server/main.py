@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException
-from anime.cache import Cache
+from .cache import Cache
 from .config import get_mal_client_id
 from .mal import MALAPI
 
