@@ -37,6 +37,7 @@ class Cache:
 
     def get(self, key):
         started = perf_counter()
+
         with self._connect() as connection:
             row = connection.execute(
                 "SELECT data, expires_at FROM cache WHERE key = ?",
@@ -45,19 +46,22 @@ class Cache:
 
             if row is None:
                 print(
-                    f"CACHE MISS: {key} ({(perf_counter() - started) * 1000:.1f}ms)",
+                    f"CACHE MISS: {key} "
+                    f"({(perf_counter() - started) * 1000:.1f}ms)",
                     flush=True,
                 )
                 return None
 
             data, expires_at = row
+
             if time() >= expires_at:
                 connection.execute(
                     "DELETE FROM cache WHERE key = ?",
                     (key,),
                 )
                 print(
-                    f"CACHE MISS (EXPIRED): {key} ({(perf_counter() - started) * 1000:.1f}ms)",
+                    f"CACHE MISS (EXPIRED): {key} "
+                    f"({(perf_counter() - started) * 1000:.1f}ms)",
                     flush=True,
                 )
                 return None
@@ -65,14 +69,17 @@ class Cache:
             result = loads(data)
 
         print(
-            f"CACHE HIT: {key} ({(perf_counter() - started) * 1000:.1f}ms)",
+            f"CACHE HIT: {key} "
+            f"({(perf_counter() - started) * 1000:.1f}ms)",
             flush=True,
         )
+
         return result
 
     def set(self, key, data, ttl):
         started = perf_counter()
         expires_at = time() + ttl
+
         with self._connect() as connection:
             connection.execute(
                 """
@@ -82,19 +89,24 @@ class Cache:
                 """,
                 (key, dumps(data), expires_at),
             )
+
         print(
-            f"CACHE SET: {key} (TTL={ttl}s, {(perf_counter() - started) * 1000:.1f}ms)",
+            f"CACHE SET: {key} "
+            f"(TTL={ttl}s, {(perf_counter() - started) * 1000:.1f}ms)",
             flush=True,
         )
 
     def delete(self, key):
         started = perf_counter()
+
         with self._connect() as connection:
             connection.execute(
                 "DELETE FROM cache WHERE key = ?",
                 (key,),
             )
+
         print(
-            f"CACHE DELETE: {key} ({(perf_counter() - started) * 1000:.1f}ms)",
+            f"CACHE DELETE: {key} "
+            f"({(perf_counter() - started) * 1000:.1f}ms)",
             flush=True,
         )
