@@ -6,8 +6,7 @@ from .cache import Cache
 class MALAPI:
     MAL_URL = "https://api.myanimelist.net/v2"
 
-    def __init__(self, client_id: str, cache: Cache):
-        self.headers = {"X-MAL-CLIENT-ID": client_id}
+    def __init__(self,cache: Cache):
         self.cache = cache
 
     def search_anime(self, query: str):
@@ -20,7 +19,6 @@ class MALAPI:
         with Client(timeout=15.0) as client:
             response = client.get(
                 f"{self.MAL_URL}/anime",
-                headers=self.headers,
                 params=params,
             )
         response.raise_for_status()
@@ -47,7 +45,6 @@ class MALAPI:
         with Client(timeout=15.0) as client:
             response = client.get(
                 f"{self.MAL_URL}/anime/{anime_id}",
-                headers=self.headers,
                 params=params,
             )
         response.raise_for_status()

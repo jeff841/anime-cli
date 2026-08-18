@@ -1,16 +1,11 @@
 from fastapi import FastAPI, HTTPException
 from .cache import Cache
-from .config import get_mal_client_id
 from .mal import MALAPI
 
 app = FastAPI(title="anime-cli API")
 
-client_id = get_mal_client_id()
-if not client_id:
-    raise RuntimeError("MAL_CLIENT_ID is not configured on the server")
-
 cache = Cache()
-api = MALAPI(client_id, cache)
+api = MALAPI(cache)
 
 
 @app.get('/')
