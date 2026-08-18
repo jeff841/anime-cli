@@ -1,21 +1,24 @@
-from fastapi import FastAPI
-from anime.api import AnimeAPI
-from os import environ
-from anime.cache import Cache
-from anime.config import get_mal_client_id
+from fastapi import FastAPI, HTTPException
+from .cache import Cache
+from .mal import MALAPI
 
-app = FastAPI()
-client_id = get_mal_client_id()
+app = FastAPI(title="anime-cli API")
+
 cache = Cache()
-api = AnimeAPI(client_id,cache) 
+api = MALAPI(cache)
+
 
 @app.get('/')
 def root():
     return {"status": "ok"}
 
+
 @app.get("/anime/search")
 def anime_search(q: str):
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty")
     return api.search_anime(q)
+
 
 @app.get("/anime/{anime_id}")
 def anime_get(anime_id: int):

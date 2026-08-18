@@ -1,9 +1,15 @@
+from os import environ
+
 PARSER_DESCRIPTION = "Manage and watch your anime!"
 ANINAME_HELP = "Name of the anime you want to watch"
 EP_HELP = "Episode you want to watch (e.g. ep1, ep2, ep10)"
 RENAME_HELP = "Command to rename the episodes in your series folder so it fits the application structure (e.g. anime --rename /path/to/your/selected/directory, or just anime --rename to open selection screen. Do not be dumb enough to run this in a non-episodes folder, it'll be hard to fix)"
 EP_ERROR = "Please provide an anime to play"
 METADATA = "anime.json"
+<<<<<<< HEAD
+=======
+API_URL = "https://anime-cli.onrender.com"
+>>>>>>> remote-api
 TERMINAL_NARROW = "Terminal is too narrow."
 EPISODE_ERROR = "Episode must be in the format ep<number>"
 EXTRAS = "Extras"

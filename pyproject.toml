@@ -9,7 +9,6 @@ dependencies = [
     "platformdirs",
     "windows-curses; platform_system == 'Windows'",
     "httpx",
-    "python-dotenv",
     "requests"
 ]
 
