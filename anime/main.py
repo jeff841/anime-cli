@@ -1,13 +1,11 @@
 from curses import wrapper
-from os import environ
-from .cache import Cache
 from .cli import menu
-from json import dump, load
+from json import dump
 from .renamer import rename, rename_sort
 from argparse import ArgumentParser
 from .picture import get_picture
 from re import search
-from .api import AnimeAPI
+from .remote_api import RemoteAnimeAPI
 from .watch_input import configured_anime_directory, watch_input
 from .collection import add_series, move_series
 from .show import show
@@ -17,9 +15,8 @@ from .extra import extra
 from .episode import episode
 import sys
 from pathlib import Path
-from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
+from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA
 from .anime_details import anime_details
-from .config import get_mal_client_id
 
 def main():
     parser = ArgumentParser(description=PARSER_DESCRIPTION)
@@ -29,7 +26,7 @@ def main():
     actions.add_argument("--rename",nargs='?',const=Path('menu'),type=Path,help=RENAME_HELP)
     actions.add_argument("--add", type=Path, metavar="DIRECTORY", help="Move a series directory into the configured anime collection")
     actions.add_argument("--move", nargs='+', metavar="ARG", help="Move a collection series to [DESTINATION], defaulting to the home directory")
-    args = parser.parse_args() 
+    args = parser.parse_args()
     if args.rename is not None:
         if args.rename == Path('menu'):
             rename()
@@ -68,7 +65,7 @@ def main():
         print(f"Moved {series_name} to {target.parent}")
         return
     elif args.ep is not None and args.anime_name is None:
-       parser.error(EP_ERROR)
+        parser.error(EP_ERROR)
     elif args.ep:
         ep = episode(args.ep)
         anime = watch_input(args.anime_name)
@@ -83,9 +80,7 @@ def main():
             return
     else:
         anime = watch_input(args.anime_name)
-        client_id = get_mal_client_id()
-        cache = Cache()
-        api = AnimeAPI(client_id,cache)
+        api = RemoteAnimeAPI()
         if anime is None:
             return
         metadata_file, items, picture = anime_details(anime, api)
@@ -125,7 +120,6 @@ def main():
                 play(anime, choices, result.selected)
                 continue
             if choices[result.selected] == 'Get anime information':
-                api = AnimeAPI(client_id,cache)
                 query = input("Enter anime name: ").strip().lower()
                 data = api.search_anime(query)
                 choices2 = [anime["title"] for anime in data]
@@ -140,7 +134,7 @@ def main():
                     dump({"id": anime_id},f)
                 results = api.get_anime(anime_id)
                 picture = get_picture(results["id"],results["main_picture"]["large"])
-                items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
+                items = [f"{results['title']}", f"{results['synopsis']}",f"Number of episodes: {results['num_episodes']}",f"Rating: {results['mean']}",f"Genres: {', '.join(genre['name'] for genre in results['genres'])}"]
                 continue
             if choices[result.selected] == 'Extras':
                 if extra(anime):
@@ -150,8 +144,8 @@ def main():
                 continue
             if choices[result.selected] == 'Exit':
                 sys.argv = [sys.argv[0]]
-                return main() 
+                return main()
             play(anime,choices,result.selected)
-    
+
 if __name__ == '__main__':
     main()
