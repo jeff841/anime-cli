@@ -17,7 +17,7 @@ from .extra import extra
 from .episode import episode
 import sys
 from pathlib import Path
-from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
+from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA
 from .anime_details import anime_details
 from .config import get_mal_client_id
 
@@ -125,7 +125,6 @@ def main():
                 play(anime, choices, result.selected)
                 continue
             if choices[result.selected] == 'Get anime information':
-                api = AnimeAPI(client_id,cache)
                 query = input("Enter anime name: ").strip().lower()
                 data = api.search_anime(query)
                 choices2 = [anime["title"] for anime in data]
