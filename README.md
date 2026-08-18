@@ -11,7 +11,7 @@ A terminal-based anime manager and player for organizing and watching anime epis
 * Keep track of watched episodes.
 * Organize episode filenames.
 * Rename an existing series directory with `--rename`.
-* Search MyAnimeList for anime information.
+* Search MyAnimeList for anime information through the project's hosted API.
 * Store application configuration outside the project directory.
 * Terminal interface using `curses`.
 
@@ -20,7 +20,7 @@ A terminal-based anime manager and player for organizing and watching anime epis
 * Python 3.10 or newer
 * VLC
 * `pipx`
-* A MyAnimeList API connection for MAL-related features
+* Internet access for MAL-related features
 
 VLC must be available as an executable on your system.
 
@@ -233,25 +233,80 @@ The configured anime directory is stored in a structure similar to:
 
 Personal configuration files should not be committed to the project repository.
 
-## MyAnimeList
+## MyAnimeList API
 
-`anime-cli` uses the MyAnimeList API for anime information.
+MAL requests are **not made directly by the installed CLI**.
 
-API configuration is handled by the application. Users should not need to commit or distribute API credentials.
+The architecture is:
 
-If local credentials are required by a development installation, store them in a local `.env` file:
-
-```env
-MAL_CLIENT_ID=your_client_id
+```text
+anime-cli
+    │
+    │ HTTPS
+    ▼
+Hosted anime-cli API
+    │
+    │ X-MAL-CLIENT-ID
+    ▼
+MyAnimeList API
 ```
 
-Never commit `.env` or other credentials to Git.
+The MAL client ID exists only on the hosted server. It is supplied through the
+server's `MAL_CLIENT_ID` environment variable and is never included in the CLI
+package.
+
+Users therefore do **not** need to create a MyAnimeList developer application,
+configure a MAL client ID, or keep an API credential on their computer.
+
+### Running the API server locally
+
+The API can also be run locally for development. From the repository root:
+
+```bash
+export MAL_CLIENT_ID="your_client_id"
+uvicorn server.main:app --reload
+```
+
+Then point the CLI at the local server:
+
+```bash
+export ANIME_API_URL="http://127.0.0.1:8000"
+anime
+```
+
+The production client defaults to the hosted API URL. `ANIME_API_URL` is only
+needed when overriding it, such as for local development or testing.
+
+### Deploying the server
+
+The repository contains a `server/Dockerfile` and `render.yaml` for deployment.
+A Render deployment can use the repository's `render.yaml` configuration.
+
+Set the following secret in the hosting provider:
+
+```text
+MAL_CLIENT_ID=your_mal_client_id
+```
+
+Do **not** put the actual client ID in `render.yaml`, Dockerfiles, source code,
+or Git.
+
+The server exposes only the operations needed by the CLI:
+
+```text
+GET /anime/search?q=<name>
+GET /anime/<id>
+```
+
+The server also keeps the existing SQLite API cache, so repeated MAL requests
+can be served without contacting MAL every time.
 
 ## Cache
 
-`anime-cli` may maintain a local cache database.
+`anime-cli` maintains a local cache for application data, while the hosted API
+maintains its own cache for MAL responses.
 
-The cache contains runtime data and should not be committed to the repository.
+Runtime cache databases should not be committed to the repository.
 
 For example, a Git repository should ignore:
 
@@ -372,7 +427,7 @@ anime-cli/
 ├── anime/
 │   ├── __init__.py
 │   ├── __main__.py
-│   ├── api.py
+│   ├── remote_api.py
 │   ├── cli.py
 │   ├── episode.py
 │   ├── extra.py
@@ -382,8 +437,15 @@ anime-cli/
 │   ├── play.py
 │   ├── renamer.py
 │   ├── reset_watched.py
-│   ├── show.py
 │   └── watch_input.py
+├── server/
+│   ├── __init__.py
+│   ├── config.py
+│   ├── main.py
+│   ├── mal.py
+│   ├── Dockerfile
+│   └── requirements.txt
+├── render.yaml
 ├── README.md
 ├── pyproject.toml
 └── .gitignore
