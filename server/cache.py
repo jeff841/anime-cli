@@ -43,6 +43,7 @@ class Cache:
             ).fetchone()
 
             if row is None:
+                print(f"CACHE MISS: {key}", flush=True)
                 return None
 
             data, expires_at = row
@@ -51,8 +52,10 @@ class Cache:
                     "DELETE FROM cache WHERE key = ?",
                     (key,),
                 )
+                print(f"CACHE MISS (EXPIRED): {key}", flush=True)
                 return None
 
+            print(f"CACHE HIT: {key}", flush=True)
             return loads(data)
 
     def set(self, key, data, ttl):
@@ -66,6 +69,7 @@ class Cache:
                 """,
                 (key, dumps(data), expires_at),
             )
+        print(f"CACHE SET: {key} (TTL={ttl}s)", flush=True)
 
     def delete(self, key):
         with self._connect() as connection:
@@ -73,3 +77,4 @@ class Cache:
                 "DELETE FROM cache WHERE key = ?",
                 (key,),
             )
+        print(f"CACHE DELETE: {key}", flush=True)
