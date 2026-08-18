@@ -1,6 +1,6 @@
 from httpx import Client
 
-from anime.cache import Cache
+from .cache import Cache
 
 
 class MALAPI:
