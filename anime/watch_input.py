@@ -12,7 +12,6 @@ from curses import wrapper
 from tkinter import Tk,filedialog
 from json import dump,load
 
-
 def configured_anime_directory():
     """Return the configured anime collection directory, if one exists."""
     config_dir = Path(user_config_dir(CONFIG))
@@ -21,7 +20,6 @@ def configured_anime_directory():
         return None
     with config_file.open() as f:
         return Path(load(f)["anime_list"])
-
 
 def watch_input(anime_name=None):
     CONFIG_DIR = Path(user_config_dir(CONFIG))

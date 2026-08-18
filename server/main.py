@@ -1,22 +1,22 @@
 from fastapi import FastAPI
-from .mal import MyAnimeList
+from anime.api import AnimeAPI
 from os import environ
-from .cache import Cache
-from dotenv import load_dotenv
+from anime.cache import Cache
+from anime.config import get_mal_client_id
 
-load_dotenv()
 app = FastAPI()
+client_id = get_mal_client_id()
 cache = Cache()
-mal = MyAnimeList(environ["MAL_CLIENT_ID"],cache)
+api = AnimeAPI(client_id,cache) 
 
 @app.get('/')
 def root():
     return {"status": "ok"}
 
 @app.get("/anime/search")
-async def anime_search(q: str):
-    return await mal.search_anime(q)
+def anime_search(q: str):
+    return api.search_anime(q)
 
 @app.get("/anime/{anime_id}")
-async def anime_get(anime_id: int):
-    return await mal.get_anime(anime_id)
+def anime_get(anime_id: int):
+    return api.get_anime(anime_id)

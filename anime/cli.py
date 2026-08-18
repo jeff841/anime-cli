@@ -12,9 +12,7 @@ MENU_WIDTH = 55
 IMAGE_X = 60
 IMAGE_Y = 2
 
-
 def command_line(win, height):
-    """Read one command from the bottom line of the menu window."""
     win.move(height - 1, 0)
     win.clrtoeol()
     win.addstr(height - 1, 0, ":")
@@ -26,18 +24,14 @@ def command_line(win, height):
         curses.noecho()
     return command
 
-
 def kitty_available():
     return os.name != "nt" and shutil.which("kitty") is not None
 
-
 def menu_rows(choices, button_start):
-    """Build visible menu rows, including a separator before application actions."""
     rows = list(range(len(choices)))
     if button_start is not None and 0 < button_start < len(choices):
         rows.insert(button_start, None)
     return rows
-
 
 def menu(
     stdscr,

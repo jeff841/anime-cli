@@ -3,9 +3,7 @@ from dataclasses import dataclass
 import os
 import re
 import shlex
-
 from .menu_result import MenuResult
-
 
 @dataclass(frozen=True)
 class MenuContext:
@@ -14,9 +12,7 @@ class MenuContext:
     screen: str = "generic"
     targets: Sequence[str] | None = None
 
-
 CommandHandler = Callable[[list[str], MenuContext], MenuResult | None]
-
 
 @dataclass(frozen=True)
 class Command:
@@ -24,12 +20,9 @@ class Command:
     handler: CommandHandler
     aliases: tuple[str, ...] = ()
 
-
 def open_command(arguments, context):
-    """Open a menu entry identified by its one-based number or exact name."""
     if not arguments:
         return None
-
     entry = " ".join(arguments)
     targets = context.targets if context.targets is not None else context.choices
     command = "open_anime" if context.screen == "episode" and context.targets is not None else "open"
@@ -39,24 +32,19 @@ def open_command(arguments, context):
             arguments = (targets[selected],) if command == "open_anime" else ()
             return MenuResult(selected=selected, command=command, arguments=arguments)
         return None
-
     for selected, choice in enumerate(targets):
         if choice.casefold() == entry.casefold():
             arguments = (choice,) if command == "open_anime" else ()
             return MenuResult(selected=selected, command=command, arguments=arguments)
     return None
 
-
 def quit_command(arguments, _context):
-    """Exit the application, or return to the anime menu from an episode menu."""
     if arguments:
         return None
     command = "back" if _context.screen == "episode" else "quit"
     return MenuResult(command=command)
 
-
 def episode_index(choices, episode):
-    """Return the index for an episode such as ``ep12``."""
     match = re.fullmatch(r"ep(\d+)", episode.casefold())
     if match is None:
         return None
@@ -66,28 +54,22 @@ def episode_index(choices, episode):
             return index
     return None
 
-
 def first_unwatched_episode(choices):
-    """Return the first episode entry that has not received the watched suffix."""
     for index, choice in enumerate(choices):
         if re.match(r"ep\d+(?:-|$)", choice, flags=re.IGNORECASE) and not choice.endswith("watched"):
             return index
     return None
 
-
 def play_command(arguments, context):
-    """Build a play action appropriate for the menu that received the command."""
     if context.screen == "anime":
         if not arguments:
             return None
-
         episode = None
         if re.fullmatch(r"ep\d+", arguments[-1], flags=re.IGNORECASE):
             episode = arguments[-1]
             arguments = arguments[:-1]
         if not arguments:
             return None
-
         anime_name = " ".join(arguments)
         targets = context.targets if context.targets is not None else context.choices
         for selected, choice in enumerate(targets):
@@ -98,7 +80,6 @@ def play_command(arguments, context):
                     arguments=(episode,) if episode else (),
                 )
         return None
-
     if context.screen == "episode":
         if len(arguments) > 1:
             return None
@@ -113,9 +94,7 @@ def play_command(arguments, context):
 
     return None
 
-
 def rename_command(arguments, context):
-    """Build a rename action for a named or currently open anime series."""
     if context.screen == "anime":
         if not arguments:
             return None
@@ -129,7 +108,6 @@ def rename_command(arguments, context):
                     arguments=(choice,),
                 )
         return None
-
     if context.screen == "episode":
         if not arguments:
             return MenuResult(command="rename_current")
@@ -142,22 +120,17 @@ def rename_command(arguments, context):
                     command="rename_anime",
                     arguments=(choice,),
                 )
-
     return None
 
-
 def add_command(arguments, context):
-    """Build an add-series action from the anime-selection menu."""
     if context.screen != "anime" or not arguments:
         return None
     return MenuResult(command="add_series", arguments=(" ".join(arguments),))
-
 
 def move_command(arguments, context):
     """Build a move-series action from the anime-selection menu."""
     if context.screen != "anime" or not arguments:
         return None
-
     targets = context.targets if context.targets is not None else context.choices
     for split_at in range(len(arguments), 0, -1):
         series_name = " ".join(arguments[:split_at])
@@ -170,14 +143,12 @@ def move_command(arguments, context):
                 )
     return None
 
-
 def command_registry(*commands):
     return {
         alias.casefold(): command
         for command in commands
         for alias in (command.name, *command.aliases)
     }
-
 
 COMMANDS = command_registry(
     Command("open", open_command, aliases=("o",)),
@@ -188,9 +159,7 @@ COMMANDS = command_registry(
     Command("quit", quit_command, aliases=("q",)),
 )
 
-
 def run_command(command_line, context):
-    """Parse and dispatch a command-line entry through the command registry."""
     try:
         parts = shlex.split(command_line, posix=os.name != "nt")
     except ValueError:
@@ -202,7 +171,6 @@ def run_command(command_line, context):
         ]
     if not parts:
         return None
-
     command = COMMANDS.get(parts[0].casefold())
     if command is None:
         return None

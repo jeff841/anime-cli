@@ -1,4 +1,6 @@
 from curses import wrapper
+from os import environ
+from .cache import Cache
 from .cli import menu
 from json import dump, load
 from .renamer import rename, rename_sort
@@ -16,22 +18,8 @@ from .episode import episode
 import sys
 from pathlib import Path
 from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
-
-
-def anime_details(anime, api):
-    """Load the optional metadata used beside an anime's episode menu."""
-    metadata_file = anime / METADATA
-    metadata_file.touch(exist_ok=True)
-    if metadata_file.stat().st_size == 0:
-        return metadata_file, None, None
-
-    with metadata_file.open() as f:
-        metadata = load(f)
-    results = api.get_anime(metadata["id"])
-    picture = get_picture(results["id"], results["main_picture"]["large"])
-    items = [f"{results["title"]}", f"{results["synopsis"]}",f"Number of episodes: {results["num_episodes"]}",f"Rating: {results["mean"]}",f"Genres: {", ".join(genre["name"] for genre in results["genres"])}"]
-    return metadata_file, items, picture
-
+from .anime_details import anime_details
+from .config import get_mal_client_id
 
 def main():
     parser = ArgumentParser(description=PARSER_DESCRIPTION)
@@ -95,7 +83,9 @@ def main():
             return
     else:
         anime = watch_input(args.anime_name)
-        api = AnimeAPI(API_URL)
+        client_id = get_mal_client_id()
+        cache = Cache()
+        api = AnimeAPI(client_id,cache)
         if anime is None:
             return
         metadata_file, items, picture = anime_details(anime, api)
@@ -135,6 +125,7 @@ def main():
                 play(anime, choices, result.selected)
                 continue
             if choices[result.selected] == 'Get anime information':
+                api = AnimeAPI(client_id,cache)
                 query = input("Enter anime name: ").strip().lower()
                 data = api.search_anime(query)
                 choices2 = [anime["title"] for anime in data]

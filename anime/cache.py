@@ -1,9 +1,12 @@
 from json import loads,dumps
+from pathlib import Path
 from sqlite3 import connect
 from time import time
+from platformdirs import user_cache_dir
 
 class Cache:
-    def __init__(self,path="cache.db"):
+    cache_file = Path(user_cache_dir("anime"))/"cache.db"
+    def __init__(self,path=cache_file):
         self.connection = connect(path)
         self.connection.execute("""
         CREATE TABLE IF NOT EXISTS cache (
