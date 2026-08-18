@@ -1,4 +1,5 @@
 from json import dumps, loads
+from os import environ
 from pathlib import Path
 from sqlite3 import connect
 from time import time
@@ -7,15 +8,17 @@ from time import time
 class Cache:
     """SQLite cache used by the hosted API.
 
-    The cache lives in /tmp inside the Render container by default. It is
-    intentionally ephemeral: losing it on a restart only causes the server
-    to fetch the data from MAL again.
+    The database path can be configured with CACHE_DB_PATH. Render's
+    filesystem is ephemeral unless a persistent disk is attached, so the
+    default location is /tmp/anime/cache.db.
     """
 
-    def __init__(self, path="/tmp/anime/cache.db"):
-        self.path = Path(path)
+    def __init__(self, path=None):
+        path = path or environ.get("CACHE_DB_PATH", "/tmp/anime/cache.db")
+        self.path = Path(path).expanduser()
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = connect(self.path)
+        self.connection = connect(self.path, timeout=30.0)
+        self.connection.execute("PRAGMA busy_timeout = 30000")
         self.connection.execute(
             """
             CREATE TABLE IF NOT EXISTS cache (
@@ -32,6 +35,7 @@ class Cache:
             "SELECT data, expires_at FROM cache WHERE key = ?",
             (key,),
         ).fetchone()
+
         if row is None:
             return None
 
@@ -60,3 +64,6 @@ class Cache:
             (key,),
         )
         self.connection.commit()
+
+    def close(self):
+        self.connection.close()
