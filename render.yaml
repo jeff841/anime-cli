@@ -3,6 +3,7 @@ services:
     name: anime-cli-api
     runtime: docker
     dockerfilePath: ./server/Dockerfile
+    dockerContext: .
     healthCheckPath: /
     envVars:
       - key: MAL_CLIENT_ID
