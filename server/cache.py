@@ -1,6 +1,7 @@
 from json import dumps, loads
 from pathlib import Path
 from sqlite3 import connect
+from threading import RLock
 from time import time
 
 
@@ -15,7 +16,8 @@ class Cache:
     def __init__(self, path="/tmp/anime/cache.db"):
         self.path = Path(path)
         self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.connection = connect(self.path)
+        self.connection = connect(self.path, check_same_thread=False)
+        self.lock = RLock()
         self.connection.execute(
             """
             CREATE TABLE IF NOT EXISTS cache (
@@ -28,35 +30,38 @@ class Cache:
         self.connection.commit()
 
     def get(self, key):
-        row = self.connection.execute(
-            "SELECT data, expires_at FROM cache WHERE key = ?",
-            (key,),
-        ).fetchone()
-        if row is None:
-            return None
+        with self.lock:
+            row = self.connection.execute(
+                "SELECT data, expires_at FROM cache WHERE key = ?",
+                (key,),
+            ).fetchone()
+            if row is None:
+                return None
 
-        data, expires_at = row
-        if time() >= expires_at:
-            self.delete(key)
-            return None
+            data, expires_at = row
+            if time() >= expires_at:
+                self.delete(key)
+                return None
 
-        return loads(data)
+            return loads(data)
 
     def set(self, key, data, ttl):
-        expires_at = time() + ttl
-        self.connection.execute(
-            """
-            INSERT OR REPLACE INTO cache
-            (key, data, expires_at)
-            VALUES (?, ?, ?)
-            """,
-            (key, dumps(data), expires_at),
-        )
-        self.connection.commit()
+        with self.lock:
+            expires_at = time() + ttl
+            self.connection.execute(
+                """
+                INSERT OR REPLACE INTO cache
+                (key, data, expires_at)
+                VALUES (?, ?, ?)
+                """,
+                (key, dumps(data), expires_at),
+            )
+            self.connection.commit()
 
     def delete(self, key):
-        self.connection.execute(
-            "DELETE FROM cache WHERE key = ?",
-            (key,),
-        )
-        self.connection.commit()
+        with self.lock:
+            self.connection.execute(
+                "DELETE FROM cache WHERE key = ?",
+                (key,),
+            )
+            self.connection.commit()
