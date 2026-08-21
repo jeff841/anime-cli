@@ -1,9 +1,14 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
 [project]
-name = "anime-cli"
+name = "anime-ctl"
 version = "0.1.0"
-description = "A terminal-based anime player."
+description = "CLI for managing and watching anime"
 readme = "README.md"
 requires-python = ">=3.10"
+license = {text = "MIT"}
 
 dependencies = [
     "platformdirs",
@@ -14,10 +19,6 @@ dependencies = [
 
 [project.scripts]
 anime = "anime.main:main"
-
-[build-system]
-requires = ["setuptools>=61"]
-build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 include = ["anime*"]
