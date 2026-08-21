@@ -1,229 +1,200 @@
 # anime-cli
 
-A terminal-based anime manager and player for organizing and watching anime episodes.
+A terminal-based anime manager and player for organizing, browsing, and watching local anime collections.
 
-`anime-cli` can organize episode files into the structure expected by the application, search MyAnimeList for anime information, and launch episodes through VLC.
+`anime-cli` provides a `curses` interface for selecting series and episodes, launches episodes with VLC, tracks watched status, renames episode files into the format expected by the application, and retrieves anime information from MyAnimeList through a hosted API.
 
 ## Features
 
-* Browse your anime collection from the terminal.
-* Play episodes using VLC.
-* Keep track of watched episodes.
-* Organize episode filenames.
-* Rename an existing series directory with `--rename`.
-* Search MyAnimeList for anime information through the project's hosted API.
-* Store application configuration outside the project directory.
-* Terminal interface using `curses`.
+- Browse an anime collection from the terminal.
+- Select anime and episodes with the keyboard or mouse.
+- Play episodes with VLC.
+- Track watched episodes and reset watched status.
+- Automatically select the first unwatched episode when requested.
+- Rename episode files into the application's `ep<number>-` format.
+- Add series directories to the configured collection.
+- Move series out of the collection.
+- Search MyAnimeList and display anime metadata and artwork.
+- Keep configuration in the user's configuration directory instead of the project directory.
+- Use a hosted API so the MAL client ID never has to be installed on the user's machine.
 
 ## Requirements
 
-* Python 3.10 or newer
-* VLC
-* `pipx`
-* Internet access for MAL-related features
+- Python 3.10 or newer
+- VLC
+- `pipx` (recommended for installation)
+- A terminal with `curses` support
+- Internet access for MyAnimeList features
 
-VLC must be available as an executable on your system.
-
-### Linux
+VLC must be installed and available on your `PATH`.
 
 On Arch Linux:
 
 ```bash
 sudo pacman -S vlc python-pipx
-```
-
-Then make sure `pipx` applications are available on your `PATH`:
-
-```bash
 pipx ensurepath
 ```
 
-Restart your shell after running `pipx ensurepath`.
+Restart your shell after `pipx ensurepath` if necessary.
 
-### Windows
-
-Install Python, VLC, and `pipx`. Make sure both Python and VLC are available to the application.
+On Windows, install Python, VLC, and `pipx`. The package installs `windows-curses` automatically on Windows.
 
 ## Installation
 
-`anime-cli` is installed with `pipx`, which keeps the application's Python dependencies isolated while making the `anime` command available globally.
-
 ### From PyPI
 
-Once the package is published:
+When the package is published to PyPI:
 
 ```bash
-pipx install anime-cli
+pipx install anime-ctl
 ```
 
-After installation, run:
-
-```bash
-anime
-```
-
-The command works regardless of your current directory.
-
-### From a local wheel
-
-To install a locally built version:
-
-```bash
-pipx install ./dist/anime_cli-0.1.0-py3-none-any.whl
-```
-
-You can then use:
+The installed command is:
 
 ```bash
 anime
 ```
 
-from any directory.
+The package name is `anime-ctl`, while the executable remains `anime`.
+
+### From a local checkout
+
+Clone the repository and install it in an isolated environment with `pipx`:
+
+```bash
+git clone https://github.com/jeff841/anime-cli.git
+cd anime-cli
+pipx install .
+```
+
+For a development installation, use a virtual environment instead:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+On Windows, activate the environment with the corresponding Windows activation command.
 
 ## Usage
 
-### Open the anime menu
+### Start the application
 
 ```bash
 anime
 ```
 
-This opens the main menu where you can browse your configured anime directory.
+The first launch asks you to select the directory containing your series folders. The directory is saved in the user's application configuration and is reused on subsequent launches.
 
-### Menu commands
-
-Press `:` in a menu to open its internal command line. The following commands
-are currently available:
-
-* `open <entry>` (or `o`) — open an entry by its one-based menu number or exact name;
-  for example, `open 2` or `open Nisekoi`. From an episode-selection menu,
-  this switches to the named anime in the collection.
-* `play <anime> [episode]` (or `p`) — from the anime-selection menu, play an
-  anime from its first unwatched episode, or from an optional episode such as
-  `ep3`. For example: `play Nisekoi ep3`.
-* `play [episode]` (or `p`) — from an episode-selection menu, play the current
-  anime from its first unwatched episode, or from the specified episode.
-* `rename <anime>` — from the anime-selection menu, rename the named series'
-  episode files into the application naming structure.
-* `rename [anime]` — from an episode-selection menu, rename the current series'
-  files, or a named series elsewhere in the collection.
-* `add <directory>` — from the anime-selection menu, move a series directory
-  into the collection; quote the path when it contains spaces.
-  The **Add series** menu button opens a directory picker for the same action.
-* `move <anime> [destination]` — from the anime-selection menu, move a named
-  series out of the collection. When no destination is given, it moves to the
-  current user's home directory.
-* `quit` (or `q`) — exit `anime-cli` from the anime-selection menu, or return
-  to that menu from an episode-selection menu.
-
-### Open an anime directly
+You can also open a specific anime directly:
 
 ```bash
-anime "anime name"
+anime "Nisekoi"
 ```
 
-For example:
+### Play an episode directly
 
 ```bash
-anime nisekoi
+anime "Nisekoi" ep1
 ```
 
-### Play an episode
+Episode names use the form `ep<number>`, for example `ep1`, `ep2`, or `ep10`.
 
-An episode can be selected through the anime menu or specified after the anime name:
+### Command-line actions
 
-```bash
-anime nisekoi ep1
-```
-
-### Add a series directory
-
-Move a series directory into the configured anime collection:
+Add a series to the configured collection:
 
 ```bash
 anime --add /path/to/Nisekoi
 ```
 
-The source directory is moved rather than copied. The command will not overwrite
-an existing series with the same directory name.
+The directory is moved into the collection rather than copied. An existing series with the same name is not overwritten.
 
-### Move a series out of the collection
-
-Move a configured series to a destination directory:
+Move a series out of the collection:
 
 ```bash
 anime --move "Nisekoi" /path/to/destination
 ```
 
-When the destination is omitted, the series is moved to your home directory. On
-Windows, this uses the current user's home folder and accepts standard Windows
-paths:
+If no destination is specified, the series is moved to your home directory:
 
-```powershell
-anime --move "Nisekoi" "C:\Users\Jeff\Videos"
+```bash
+anime --move "Nisekoi"
 ```
 
-## Directory Structure
+Rename the files in a series directory:
 
-`anime-cli` expects your anime collection to be organized approximately like this:
-
-```text
-anime/
-├── Nisekoi/
-│   ├── ep1-...
-│   ├── ep2-...
-│   └── ep3-...
-│
-├── Naruto/
-│   ├── ep1-...
-│   ├── ep2-...
-│   └── ep3-...
-│
-└── One Piece/
-    ├── ep1-...
-    ├── ep2-...
-    └── ep3-...
+```bash
+anime --rename /path/to/Nisekoi
 ```
 
-The configured directory should contain the **series folders**, rather than being a single series folder.
-
-## Renaming Episodes
-
-If your episodes aren't using the naming structure expected by `anime-cli`, use:
+Running `--rename` without a path opens an interactive directory-selection menu:
 
 ```bash
 anime --rename
 ```
 
-This opens a menu allowing you to:
+### Interactive commands
 
-1. Enter a directory path.
-2. Select a directory using a file explorer.
-3. Exit.
+Press `:` inside a menu to open the command line.
 
-You can also provide the directory directly:
+The available commands include:
 
-```bash
-anime --rename /path/to/anime
+| Command | Description |
+| --- | --- |
+| `open <entry>` / `o` | Open an entry by menu number or exact name. |
+| `play <anime> [episode]` / `p` | Play an anime, optionally starting at a specified episode. |
+| `play [episode]` / `p` | From an episode menu, play the current anime. |
+| `rename <anime>` | Rename another series in the collection. |
+| `rename [anime]` | Rename the current series or a named series. |
+| `add <directory>` | Add a series directory to the collection. |
+| `move <anime> [destination]` | Move a series out of the collection. |
+| `quit` / `q` | Exit the application or return to the previous menu. |
+
+The main menu also provides actions for adding a series, changing the anime directory, and exiting. The episode menu provides actions for renaming, retrieving anime information, resetting watched status, and returning to the collection.
+
+## Anime Directory Structure
+
+The configured directory should contain one directory per series:
+
+```text
+~/anime/
+├── Nisekoi/
+│   ├── ep1-
+│   ├── ep2-
+│   └── ep3-
+├── Naruto/
+│   ├── ep1-
+│   ├── ep2-
+│   └── ep3-
+└── One Piece/
+    ├── ep1-
+    ├── ep2-
+    └── ep3-
 ```
 
-For example:
+`anime-cli` treats the directories immediately inside the configured directory as anime series.
 
-```bash
-anime --rename ~/Downloads/Nisekoi
+## Renaming Episodes
+
+The renamer sorts the files in a series directory and renames them sequentially:
+
+```text
+original-file-1.mkv  ->  ep1-
+original-file-2.mkv  ->  ep2-
+original-file-3.mkv  ->  ep3-
 ```
 
-The renamer converts the files into the episode naming scheme used by the application.
+The generated names are the format currently expected by the application. `anime.json` is excluded from the rename operation.
 
-> Make sure you have a backup if the directory contains files you don't want renamed.
+**Back up important files before using the renamer.** Renaming changes the files in place and is not reversible by `anime-cli`.
 
 ## Configuration
 
-Application configuration is stored in the user's configuration directory rather than inside the project.
+Configuration is stored using the platform's standard user configuration directory through `platformdirs`.
 
-The application creates its configuration directory automatically when needed.
-
-The configured anime directory is stored in a structure similar to:
+The anime collection path is stored in a file named `directory.json` under the application's configuration directory. Its contents have the following form:
 
 ```json
 {
@@ -231,117 +202,131 @@ The configured anime directory is stored in a structure similar to:
 }
 ```
 
-Personal configuration files should not be committed to the project repository.
+The application creates the configuration directory and file when needed.
 
-## MyAnimeList API
+To change the configured collection directory, use the **Change anime directory** option in the main menu.
 
-MAL requests are **not made directly by the installed CLI**.
+Personal configuration should not be committed to Git.
 
-The architecture is:
+## MyAnimeList Integration
 
-```text
-anime-cli
-    │
-    │ HTTPS
-    ▼
-Hosted anime-cli API
-    │
-    │ X-MAL-CLIENT-ID
-    ▼
-MyAnimeList API
-```
-
-The MAL client ID exists only on the hosted server. It is supplied through the
-server's `MAL_CLIENT_ID` environment variable and is never included in the CLI
-package.
-
-Users therefore do **not** need to create a MyAnimeList developer application,
-configure a MAL client ID, or keep an API credential on their computer.
-
-### Running the API server locally
-
-The API can also be run locally for development. From the repository root:
-
-```bash
-export MAL_CLIENT_ID="your_client_id"
-uvicorn server.main:app --reload
-```
-
-Then point the CLI at the local server:
-
-```bash
-export ANIME_API_URL="http://127.0.0.1:8000"
-anime
-```
-
-The production client defaults to the hosted API URL. `ANIME_API_URL` is only
-needed when overriding it, such as for local development or testing.
-
-### Deploying the server
-
-The repository contains a `server/Dockerfile` and `render.yaml` for deployment.
-A Render deployment can use the repository's `render.yaml` configuration.
-
-Set the following secret in the hosting provider:
+MyAnimeList requests are made through the project's hosted API rather than directly from the installed CLI.
 
 ```text
-MAL_CLIENT_ID=your_mal_client_id
+┌────────────┐       HTTPS       ┌──────────────────┐       HTTPS       ┌──────────────┐
+│ anime-cli  │ ─────────────────> │ anime-cli API    │ ───────────────> │ MyAnimeList  │
+│            │                    │                  │                  │ API          │
+└────────────┘                    └──────────────────┘                  └──────────────┘
+                                         │
+                                         │ MAL_CLIENT_ID
+                                         ▼
+                                  Server environment
 ```
 
-Do **not** put the actual client ID in `render.yaml`, Dockerfiles, source code,
-or Git.
+The MAL client ID is stored only on the API server as the `MAL_CLIENT_ID` environment variable. It is not part of the CLI package and users do not need to create a MyAnimeList developer application or configure a MAL credential locally.
 
-The server exposes only the operations needed by the CLI:
+The CLI currently uses these API endpoints:
 
 ```text
+GET /
 GET /anime/search?q=<name>
 GET /anime/<id>
 ```
 
-The server also keeps the existing SQLite API cache, so repeated MAL requests
-can be served without contacting MAL every time.
+The API caches search results for 24 hours and anime details for 7 days using SQLite.
 
-## Cache
+The production API URL is currently configured as:
 
-`anime-cli` maintains a local cache for application data, while the hosted API
-maintains its own cache for MAL responses.
-
-Runtime cache databases should not be committed to the repository.
-
-For example, a Git repository should ignore:
-
-```gitignore
-*.db
+```text
+https://anime-cli.onrender.com
 ```
 
-## Updating
+### Local API development
 
-If `anime-cli` was installed with `pipx`, update it with:
+The API server can be run locally from the repository root.
+
+Set the MAL client ID in your environment:
 
 ```bash
-pipx upgrade anime-cli
+export MAL_CLIENT_ID="your_client_id"
 ```
 
-If a new release is available on PyPI, `pipx` will install the updated version.
-
-## Uninstalling
-
-To remove `anime-cli`:
+Then start the server:
 
 ```bash
-pipx uninstall anime-cli
+uvicorn server.main:app --reload
 ```
+
+The CLI's production API URL is defined in `anime/constants.py`. For local development, point the CLI at your local API by changing that value or using the API URL override supported by your local source version.
+
+**Never commit a real MAL client ID to Git.**
+
+### Render deployment
+
+The repository includes `render.yaml` and `server/Dockerfile` for deploying the API to Render. The deployment uses the `MAL_CLIENT_ID` environment variable as a secret and exposes the server on the port supplied by Render.
+
+## Metadata and Artwork
+
+When anime information is selected from the MyAnimeList search, the series directory receives an `anime.json` file containing the selected MyAnimeList anime ID.
+
+The application uses that ID to retrieve metadata such as:
+
+- Title
+- Synopsis
+- Number of episodes
+- Rating
+- Genres
+- Main artwork
+
+Artwork is displayed in terminals where Kitty graphics are available. The interface also works without Kitty; artwork is simply not displayed.
+
+## Building
+
+Install the build frontend:
+
+```bash
+python -m pip install build
+```
+
+Build the package:
+
+```bash
+python -m build
+```
+
+The generated distribution files are placed in `dist/`.
+
+To test a wheel with `pipx`:
+
+```bash
+pipx install ./dist/<wheel-file>.whl
+```
+
+If the package is already installed, reinstall the wheel:
+
+```bash
+pipx reinstall ./dist/<wheel-file>.whl
+```
+
+Test the installed command outside the repository:
+
+```bash
+cd ~
+anime --help
+```
+
+This helps verify that the application is using the installed package rather than the source checkout.
 
 ## Development
 
 Clone the repository:
 
 ```bash
-git clone https://github.com/jeff841/anime-cli
+git clone https://github.com/jeff841/anime-cli.git
 cd anime-cli
 ```
 
-Create a development virtual environment:
+Create and activate a virtual environment:
 
 ```bash
 python -m venv .venv
@@ -354,58 +339,49 @@ Install the project in editable mode:
 pip install -e .
 ```
 
-This allows changes to the source code to be tested without rebuilding the package after every change.
+The project uses `setuptools` for packaging. The Python package is `anime`, while the distribution/project name is `anime-ctl` and the command-line entry point is `anime`.
 
-## Building
-
-Install the Python build frontend:
-
-```bash
-python -m pip install build
-```
-
-Build the package:
-
-```bash
-python -m build
-```
-
-This creates the distribution files in `dist/`:
+## Project Structure
 
 ```text
-dist/
-├── anime_cli-0.1.0-py3-none-any.whl
-└── anime_cli-0.1.0.tar.gz
+anime-cli/
+├── anime/
+│   ├── __init__.py
+│   ├── __main__.py
+│   ├── anime_details.py
+│   ├── cli.py
+│   ├── collection.py
+│   ├── commands.py
+│   ├── constants.py
+│   ├── episode.py
+│   ├── extra.py
+│   ├── kitty.py
+│   ├── main.py
+│   ├── menu_result.py
+│   ├── picture.py
+│   ├── play.py
+│   ├── remote_api.py
+│   ├── renamer.py
+│   ├── reset_watched.py
+│   ├── show.py
+│   └── watch_input.py
+├── server/
+│   ├── __init__.py
+│   ├── cache.py
+│   ├── config.py
+│   ├── main.py
+│   ├── mal.py
+│   ├── Dockerfile
+│   └── requirements.txt
+├── render.yaml
+├── pyproject.toml
+├── README.md
+└── .gitignore
 ```
 
-### Test the built wheel with pipx
+## Git and Generated Files
 
-You can test the exact wheel that will be distributed:
-
-```bash
-pipx install ./dist/anime_cli-0.1.0-py3-none-any.whl
-```
-
-Then test the application from outside the repository:
-
-```bash
-cd ~
-anime --help
-```
-
-This verifies that the installed package works independently of the source directory.
-
-If the package is already installed, reinstall the newly built wheel:
-
-```bash
-pipx reinstall ./dist/anime_cli-0.1.0-py3-none-any.whl
-```
-
-## Git
-
-Generated files and local configuration should not be committed.
-
-A suitable `.gitignore` includes:
+Do not commit local environments, build artifacts, caches, or personal configuration. A suitable `.gitignore` includes entries such as:
 
 ```gitignore
 .venv/
@@ -418,45 +394,12 @@ dist/
 .env
 ```
 
-Source code, `pyproject.toml`, documentation, and other files required to build and distribute the application should be committed.
-
-## Project Structure
-
-```text
-anime-cli/
-├── anime/
-│   ├── __init__.py
-│   ├── __main__.py
-│   ├── remote_api.py
-│   ├── cli.py
-│   ├── episode.py
-│   ├── extra.py
-│   ├── kitty.py
-│   ├── main.py
-│   ├── picture.py
-│   ├── play.py
-│   ├── renamer.py
-│   ├── reset_watched.py
-│   └── watch_input.py
-├── server/
-│   ├── __init__.py
-│   ├── config.py
-│   ├── main.py
-│   ├── mal.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── render.yaml
-├── README.md
-├── pyproject.toml
-└── .gitignore
-```
+The source code, `pyproject.toml`, README, deployment configuration, and other project files required to build or deploy the application should be committed.
 
 ## License
 
-Add your chosen license here before publishing the project.
+The project metadata currently declares the MIT license. Add a `LICENSE` file to the repository if the project is intended to be distributed publicly under MIT.
 
 ## Status
 
-`anime-cli` is currently in early development.
-
-The `0.1.0` release is an initial release while the application's interface and features continue to mature.
+`anime-cli` is an early-stage project. The command-line interface, packaging, hosted API, and feature set are still evolving.
