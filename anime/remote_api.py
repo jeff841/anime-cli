@@ -1,5 +1,4 @@
 from httpx import Client, HTTPStatusError, RequestError
-
 from .constants import API_URL
 
 

@@ -1,6 +1,6 @@
 from curses import wrapper
 from .cli import menu
-from json import dump
+from json import dump, load
 from .renamer import rename, rename_sort
 from argparse import ArgumentParser
 from .picture import get_picture
@@ -133,6 +133,11 @@ def main():
                 with metadata_file.open('w') as f:
                     dump({"id": anime_id},f)
                 results = api.get_anime(anime_id)
+                with metadata_file.open('r') as f:
+                    data2 = load(f)
+                with metadata_file.open('w') as f:
+                    data2.update({"title": results["title"], "synopsis": results["synopsis"], "num_episodes": results["num_episodes"], "mean": results["mean"], "genres": results["genres"], "main_picture": {"large": results["main_picture"]["large"]}})
+                    dump(data2, f)
                 picture = get_picture(results["id"],results["main_picture"]["large"])
                 items = [f"{results['title']}", f"{results['synopsis']}",f"Number of episodes: {results['num_episodes']}",f"Rating: {results['mean']}",f"Genres: {', '.join(genre['name'] for genre in results['genres'])}"]
                 continue
