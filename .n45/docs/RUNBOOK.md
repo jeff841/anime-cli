@@ -15,9 +15,9 @@ setup: python -m venv .venv && source .venv/bin/activate && pip install -e . fas
 start: null
 stop: null
 test:
-    all: none
-    unit: none
-updated_at: "2026-11-13 10:41:11"
+    all: pytest
+    unit: pytest
+updated_at: "2026-11-13 11:20:15"
 url: http://127.0.0.1:8000
 ---
 
@@ -68,6 +68,13 @@ uvicorn server.main:app --port 8000
 
 # Run the CLI
 anime
+
+# Point the CLI at another metadata server (env var wins over config.json)
+ANIME_API_URL=http://nas.local:8000 anime
+
+# Run tests
+pip install -e ".[dev]"
+pytest
 anime --rename /path/to/series
 
 # Build
@@ -85,6 +92,7 @@ python -m build
 | Symptom | Likely cause | Fix |
 | ------- | ------------ | --- |
 | KeyError MAL_CLIENT_ID on server start | Missing env var | Set it in `.env` or the environment |
-| Connection refused in CLI when fetching info | Server not running | Start `uvicorn server.main:app` |
+| Connection refused in CLI when fetching info | Server not running, or wrong server URL | Start `uvicorn server.main:app`, or check `ANIME_API_URL` / `api_url` in `config.json` |
+| `Invalid server URL ... (from ANIME_API_URL)` or `Invalid config file ...` on start | Bad URL (needs http:// or https://, host, valid port, no credentials) or malformed `config.json` | Fix or unset the value; the CLI never edits `config.json` |
 | "VLC is not installed or is not in PATH" | VLC missing | Install VLC |
 | No cover image | Not running in kitty or terminal too narrow | Use kitty, widen terminal |

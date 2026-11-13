@@ -69,3 +69,16 @@
 {"op":"link","from":"mod:server/mal","to":"dep:httpx","edge":"depends","ts":"2026-11-13 10:40:43"}
 {"op":"link","from":"mod:server/mal","to":"dep:api.myanimelist.net","edge":"depends","ts":"2026-11-13 10:40:43"}
 {"op":"link","from":"mod:server/cache","to":"model:Cache","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/config","name":"Resolves and validates the server URL from env var or config.json","attr":{"layer":"infra"},"src":[{"path":"anime/config.py","sha":"18f67c3e62b0415e12518803c23f60e50aa3db1a"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"add","kind":"config","id":"config:ANIME_API_URL","attr":{"desc":"Server URL for the metadata API; overrides config.json api_url","example":"http://192.168.1.10:8000","kind":"env","required":"não"},"src":[{"path":"anime/constants.py","sha":"866a48ca40eb6da858a4128236ee2a7291f738c3"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/config","to":"config:ANIME_API_URL","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/config","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/config","to":"dep:platformdirs","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"link","from":"mod:anime/config","to":"mod:anime/constants","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"add","kind":"dep","id":"dep:pytest","attr":{"scope":"dev"},"src":[{"path":"pyproject.toml","sha":"3d1842761761997c98c88b4e6af8e43769b48871"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"remove","kind":"dep","id":"dep:pytest","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:33"}
+{"op":"add","kind":"feature","id":"feat:feat-0001-configurable-server-url","name":"feat-0001-configurable-server-url","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"mod:anime/config","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"config:ANIME_API_URL","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"dep:pytest","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"restamp","paths":{"anime/constants.py":"866a48ca40eb6da858a4128236ee2a7291f738c3","anime/main.py":"b4255065733c627877c4fa1305d422475ff5f1c6","pyproject.toml":"3d1842761761997c98c88b4e6af8e43769b48871"},"ts":"2026-11-13 11:19:33"}

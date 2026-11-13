@@ -1,6 +1,6 @@
 ## Internal Architecture
 
-Organization into modules and layers of the source code.
+Organization of the source code into modules and layers.
 
 ---
 
@@ -11,13 +11,13 @@ flowchart TB
   Playback["Playback\nlaunch VLC and mark watched"]
   Renaming["Renaming\nnormalize filenames to epN-"]
   Metadata["Metadata\nfetch and display MAL info and cover"]
-  Server["Metadata server\nproxy and cache MAL API"]
-  Playback -.->|uses| Collection
-  Renaming -.->|uses| Collection
-  Metadata -.->|uses| Collection
-  Metadata -.->|calls| Server
+  Server["Metadata server\nFastAPI proxy and SQLite cache"]
+  Collection -.->|uses| Playback
+  Collection -.->|uses| Renaming
+  Collection -.->|uses| Metadata
+  Metadata -.->|HTTP| Server
 ```
 
 ---
 
-_Created at: 
+_Created at: 2026-11-13 11:20_

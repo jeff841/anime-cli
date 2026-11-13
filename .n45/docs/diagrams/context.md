@@ -7,12 +7,12 @@ External view: actors, integrations and dependencies.
 ```mermaid
 %%{init: {'theme': 'neutral'} }%%
 flowchart TD
-  A([Local anime watcher]) --> S[anime-cli]
-  S --> E1["MyAnimeList API v2\nMetadata and cover images"]
-  S --> E2["VLC\nEpisode playback"]
-  S --> E3["kitty icat\nCover image rendering"]
+  U([Local anime watcher]) --> S[anime-cli]
+  S --> MAL["MyAnimeList API v2\nAnime metadata and covers"]
+  S --> VLC["VLC\nEpisode playback"]
+  S --> K["kitty icat\nCover image rendering"]
 ```
 
 ---
 
-_Created at: 
+_Created at: 2026-11-13 11:20_

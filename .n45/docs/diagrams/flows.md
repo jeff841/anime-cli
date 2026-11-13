@@ -1,6 +1,6 @@
 ## User Flows
 
-Sequence of interactions for the main application flows.
+Interaction sequences for the main application flows.
 
 ---
 
@@ -11,17 +11,20 @@ Sequence of interactions for the main application flows.
 sequenceDiagram
   actor U as User
   participant C as CLI
+  participant D as Config directory
   participant V as VLC
-  U->>C: runs anime or anime name epN
-  C->>U: first run asks for the series directory, saved to config
-  U->>C: selects series and episode
-  C->>V: plays episode fullscreen
-  V-->>C: playback ends
-  C->>C: renames file with watched suffix
+  U->>C: run anime
+  C->>D: read collection directory
+  alt first run
+    C->>U: ask for series directory
+    U->>C: choose directory
+    C->>D: save directory
+  end
+  U->>C: select series and episode
+  C->>V: play episode fullscreen
+  C->>C: rename file with watched suffix
   alt VLC missing
     C-->>U: RuntimeError
-  else VLC available
-    C->>V: plays next episode
   end
 ```
 
@@ -32,19 +35,20 @@ sequenceDiagram
 sequenceDiagram
   actor U as User
   participant C as CLI
-  participant S as Server
-  participant M as MyAnimeList API
-  U->>C: chooses Get anime information
-  U->>C: enters a name
+  participant S as Metadata server
+  participant M as MyAnimeList
+  U->>C: choose Get anime information
+  C->>C: resolve server URL
+  U->>C: enter name
   C->>S: GET /anime/search?q=name
-  S->>M: search anime
+  S->>M: search
   M-->>S: results
   S-->>C: up to 10 results
-  U->>C: picks a result
-  C->>C: stores id in anime.json
-  C->>S: GET /anime/{anime_id}
-  S-->>C: details
-  C-->>U: title, synopsis, genres and cover (kitty only)
+  U->>C: pick one
+  C->>C: save id in anime.json
+  C->>S: GET /anime/id
+  S-->>C: title, synopsis, genres, cover
+  C-->>U: show info and cover (kitty only)
   alt server unreachable
     C-->>U: unhandled HTTP error
   end
@@ -52,4 +56,4 @@ sequenceDiagram
 
 ---
 
-_Created at: 
+_Created at: 2026-11-13 11:20_

@@ -8,7 +8,7 @@ Entities, key fields and relations.
 %%{init: {'theme': 'neutral'} }%%
 erDiagram
   CACHE {
-    string key
+    string key PK
     string data
     float expires_at
   }
@@ -16,4 +16,4 @@ erDiagram
 
 ---
 
-_Created at: 
+_Created at: 2026-11-13 11:20_

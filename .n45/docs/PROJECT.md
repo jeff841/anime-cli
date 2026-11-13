@@ -3,7 +3,7 @@ created_at: "2026-11-13 10:41:11"
 description: Terminal-based anime manager and player with MyAnimeList metadata
 n45_version: 1.1.0
 type: CLI
-updated_at: "2026-11-13 10:41:11"
+updated_at: "2026-11-13 11:20:23"
 ---
 ## Overview
 
@@ -55,6 +55,7 @@ A terminal-based anime manager and player. It lists series folders from a user-c
 - Series metadata lives in `anime.json` inside the series folder and is excluded from episode listings
 - The collection directory must contain only series folders
 - `--rename` renames every file in the target directory to `ep<N>-` in sorted order, destroying the original names
+- The metadata server URL comes from `ANIME_API_URL`, then `api_url` in `config.json`, then `http://127.0.0.1:8000`; an invalid configured value aborts startup of the interactive menu with exit code 1 and one error line
 
 ## Limits
 

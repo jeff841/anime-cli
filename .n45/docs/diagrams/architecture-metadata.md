@@ -1,4 +1,4 @@
-## Internal Architecture — Metadata
+## Internal Architecture - Metadata
 
 Internal layers and integrations of the Metadata area.
 
@@ -7,14 +7,16 @@ Internal layers and integrations of the Metadata area.
 ```mermaid
 %%{init: {'theme': 'neutral'} }%%
 flowchart LR
-  CLI["anime/cli\ncurses menu and info panel"] --> API["anime/api\nHTTP client"]
-  CLI --> Picture["anime/picture\ncover download and cache"]
-  CLI --> Kitty["anime/kitty\nkitty icat rendering"]
-  API --> Server["server/main\nFastAPI :8000"]
-  Picture --> MAL["MyAnimeList API v2"]
-  Kitty --> Icat["kitty icat"]
+  CLI["anime/cli\ncurses menu"] --> API["anime/api\nhttpx client"]
+  CLI --> PIC["anime/picture\ncover download"]
+  CLI --> KIT["anime/kitty\nkitty icat"]
+  API --> CFG["anime/config\nresolve server URL"]
+  CFG -.->|reads| ENV["ANIME_API_URL"]
+  CFG -.->|reads| CJ["config.json"]
+  API --> SRV["server/main\nFastAPI"]
+  PIC --> MALIMG["MyAnimeList images"]
 ```
 
 ---
 
-_Created at: 
+_Created at: 2026-11-13 11:20_

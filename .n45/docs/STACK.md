@@ -19,14 +19,16 @@ layers:
       name: infra
       technology: pip / setuptools
     - items:
-        note: No test framework or test files exist in the repository
+        install: pip install -e ".[dev]"
+        run: pytest
+        scope: tests/test_config.py covers URL resolution and validation (anime/config.py)
       name: tests
-      technology: none configured
+      technology: pytest>=7 (dev extra in pyproject.toml)
     - items:
         endpoints: GET /, GET /anime/search?q=, GET /anime/{anime_id}
         upstream: MyAnimeList API v2 using X-MAL-CLIENT-ID header
       name: api
       technology: REST (JSON)
 n45_version: 1.1.0
-updated_at: "2026-11-13 10:41:11"
+updated_at: "2026-11-13 11:20:15"
 ---

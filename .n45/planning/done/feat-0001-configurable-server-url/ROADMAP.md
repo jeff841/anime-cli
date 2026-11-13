@@ -1,5 +1,6 @@
 ---
 branch: feat/0001-configurable-server-url
+completed_at: "2026-11-13 11:20:33"
 created_at: "2026-11-13 11:03:31"
 id: feat-0001-configurable-server-url
 n45_version: 1.1.0
@@ -21,6 +22,6 @@ phases:
           persona: backend
           status: done
           title: Document server URL configuration and test setup in README
-status: validating
-updated_at: "2026-11-13 11:11:45"
+status: archived
+updated_at: "2026-11-13 11:20:33"
 ---
