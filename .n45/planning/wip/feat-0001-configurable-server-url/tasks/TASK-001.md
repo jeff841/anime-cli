@@ -3,28 +3,28 @@ checkpoint: null
 complexity: M
 created_at: "2026-11-13 11:06:37"
 criteria:
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_env_var_wins or test_env_var_skips_malformed_config'
       text: 'Env var wins: ANIME_API_URL=http://192.168.1.10:8000 is returned unchanged, and a malformed config.json is not read when the env var is valid'
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_config_file_used_when_env_unset or test_blank_env_falls_through or test_blank_api_url_falls_back_to_default'
       text: config.json api_url http://nas.local:8000 is used when the env var is unset, blank ('' / '   ') env falls through, blank api_url falls back to the default
-    - done: false
+    - done: true
       test: python -c "from pathlib import Path; from anime.config import resolve_api_url; assert resolve_api_url({}, Path('/nonexistent-n45-dir/config.json')) == 'http://127.0.0.1:8000'" && python -m pytest tests/test_config.py -q -k test_default_when_nothing_configured
       text: With nothing configured resolve_api_url returns exactly http://127.0.0.1:8000
-    - done: false
+    - done: true
       test: 'python -c "from pathlib import Path; from anime.config import resolve_api_url as r; m = Path(''/nonexistent-n45-dir/config.json''); assert r({''ANIME_API_URL'': ''http://host/api//''}, m) == ''http://host/api''; assert r({''ANIME_API_URL'': ''  http://host:9000  ''}, m) == ''http://host:9000''; assert r({''ANIME_API_URL'': ''http://nas.local:8000/''}, m) == ''http://nas.local:8000''" && python -m pytest tests/test_config.py -q -k test_url_normalization'
       text: 'Normalization strips whitespace and every trailing slash: ''http://host/api//'' -> ''http://host/api'', ''  http://host:9000  '' -> ''http://host:9000'''
-    - done: false
+    - done: true
       test: python -c "from pathlib import Path; from platformdirs import user_config_dir; from anime.config import config_file_path; assert config_file_path() == Path(user_config_dir('anime')) / 'config.json'" && python -m pytest tests/test_config.py -q -k test_config_file_path_location
       text: config_file_path() equals Path(user_config_dir('anime')) / 'config.json'
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_bad_scheme_rejected or test_uppercase_https_accepted'
       text: nas.local:8000, file:///etc/passwd, ftp://host and javascript:alert(1) are rejected with 'must start with http:// or https://' naming the source, while HTTPS://Host:8443 is accepted
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_missing_host_rejected or test_invalid_port_rejected or test_malformed_url_rejected'
       text: http:// and http:///path raise 'missing host', http://host:abc raises 'invalid port', and a value urlsplit cannot parse (http://[::1) raises 'malformed URL' instead of a traceback
-    - done: false
+    - done: true
       test: |-
         python -c "from pathlib import Path; from anime.config import resolve_api_url, ConfigError
         try:
@@ -34,19 +34,19 @@ criteria:
         else:
             raise SystemExit('no error raised')"
       text: Malformed IPv6-like value is converted to ConfigError (no bare ValueError escapes)
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k test_invalid_env_does_not_fall_back
       text: An invalid env var with a valid config.json still raises (no fallback)
-    - done: false
+    - done: true
       test: 'python -m pytest tests/test_config.py -q -k ''test_get_api_url_exits_1_with_one_stderr_line or test_get_api_url_returns_resolved_url'' && err=$(ANIME_API_URL=ftp://x python -c ''from anime.config import get_api_url; get_api_url()'' 2>&1 >/dev/null); rc=$?; test $rc -eq 1 && test "$err" = ''Invalid server URL "ftp://x" (from ANIME_API_URL): must start with http:// or https://'''
       text: get_api_url() with an invalid ANIME_API_URL writes exactly one stderr line, no stdout, exits with code 1 and no traceback
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_config_bad_json or test_config_empty_file or test_config_not_utf8 or test_config_not_object or test_config_api_url_not_string or test_config_path_is_directory or test_config_deeply_nested_json or test_config_invalid_url_names_file'
       text: 'Malformed config.json cases produce ''Invalid config file <path>: <reason>'' (bad JSON with line/column, empty file, non-UTF-8, non-object, non-string api_url incl. null, directory path, nesting too deep) and an invalid api_url names the file as source'
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k test_config_key_absent_returns_default
       text: 'config.json without api_url ({"other": 1}) returns the default URL'
-    - done: false
+    - done: true
       test: |-
         python -c "from pathlib import Path; from anime.config import resolve_api_url, ConfigError
         try:
@@ -56,31 +56,33 @@ criteria:
         else:
             raise SystemExit('no error raised')" && python -m pytest tests/test_config.py -q -k test_credentials_rejected_and_redacted
       text: http://user:secret@host is rejected with 'must not contain credentials' and the message shows http://***@host without 'user' or 'secret'
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k 'test_control_chars_escaped or test_non_ascii_kept'
       text: Control characters in echoed values become literal escapes (\x1b, \n) with no real ESC/newline in the message, and printable non-ASCII (café) is kept
-    - done: false
+    - done: true
       test: python -m pytest tests/test_config.py -q -k test_resolver_creates_nothing && ! grep -nE 'write_text|write_bytes|mkdir|touch|\.open\(|[^_]open\(' anime/config.py
       text: 'The resolver has no filesystem side effects: a config_file in a non-existent tmp dir leaves the dir non-existent, and config.py has no write/mkdir/touch/open calls'
-    - done: false
+    - done: true
       test: test "$(grep -c 'get_api_url()' anime/main.py)" -eq 1 && awk '/^    else:/{e=NR} /AnimeAPI\(get_api_url\(\)\)/{a=NR} /watch_input\(args\.anime_name\)/{w=NR} END{exit !(e && a>e && w>a)}' anime/main.py
       text: 'main.py calls get_api_url() exactly once, as AnimeAPI(get_api_url()) inside the final interactive else: branch before watch_input'
-    - done: false
+    - done: true
       test: '! grep -nw ''API_URL'' anime/main.py anime/constants.py anime/config.py'
       text: The name API_URL no longer exists in the package (only DEFAULT_API_URL / API_URL_ENV / API_URL_KEY)
-    - done: false
+    - done: true
       test: python -c 'import anime.main' && test "$(grep -c 'AnimeAPI(' anime/main.py)" -eq 1
       text: '--rename and ep<N> branches never resolve the URL: main.py still imports cleanly and AnimeAPI is only built in the interactive branch'
-    - done: false
+    - done: true
       test: grep -qE '^dev = \["pytest>=7"\]' pyproject.toml && grep -qF 'testpaths = ["tests"]' pyproject.toml && grep -qF 'pythonpath = ["."]' pyproject.toml && ! sed -n '/^dependencies/,/^\]/p' pyproject.toml | grep -q pytest
       text: pyproject.toml declares pytest only as the dev extra and configures testpaths/pythonpath
-    - done: false
+    - done: true
       test: '! grep -nE ''pytest\.raises\(ConfigError\):'' tests/test_config.py'
       text: 'Every ConfigError expectation checks the message: no bare ''with pytest.raises(ConfigError):'' in the suite'
-    - done: false
+    - done: true
       test: python -m pytest -q
       text: Whole suite passes from the repo root
 deps: []
+diff_base: 488669f86d9a0069663be099ae85fb99d38c6bd5
+diff_tip: 502571a6e8b0e19aef7a68d32e500d856a737e80
 files:
     - anime/config.py
     - anime/constants.py
@@ -91,18 +93,27 @@ files:
 id: TASK-001
 linter: python -m py_compile anime/config.py anime/constants.py anime/main.py tests/test_config.py
 n45_version: 1.1.0
-outcome: ""
+outcome: |
+    Module `anime/config.py` (no HTTP endpoints):
+
+    - `resolve_api_url(environ: Mapping[str,str] | None = None, config_file: Path | None = None) -> str` - pure; returns validated URL without trailing `/`. Precedence: `ANIME_API_URL` env (non-blank) -> `api_url` in `<user_config_dir("anime")>/config.json` -> `http://127.0.0.1:8000`. An invalid set source raises, never falls back. Config file read only when env is blank; no filesystem side effects.
+    - `ConfigError(Exception)` - `str()` is the final sanitized one-line message (`Invalid server URL "<v>" (from <source>): <reason>` / `Invalid config file <path>: <reason>`).
+    - `get_api_url() -> str` - CLI entry; on `ConfigError` prints message to stderr and raises `SystemExit(1)`.
+    - `config_file_path() -> Path` - `Path(user_config_dir("anime")) / "config.json"`.
+    - `anime/constants.py`: `API_URL` removed; added `DEFAULT_API_URL`, `API_URL_ENV`, `API_URL_KEY`, `CONFIG_JSON` and message constants.
+    - `anime/main.py`: `AnimeAPI(get_api_url())` only in the interactive branch; `--rename` and `ep<N>` never resolve the URL.
+    - Tooling: `pytest>=7` dev extra, pytest config in `pyproject.toml`, `tests/test_config.py` (39 tests).
 persona: backend
 phase: Phase 1 — Configurable server URL
 roadmap: feat-0001-configurable-server-url
-status: pending
+status: done
 tdd:
-    green: false
-    red: false
-    refactor: false
+    green: true
+    red: true
+    refactor: true
 tests: python -m pytest tests/test_config.py -q
 title: Resolve server URL from ANIME_API_URL / config.json with validation and pytest suite
-updated_at: "2026-11-13 11:06:37"
+updated_at: "2026-11-13 11:11:40"
 ---
 ## Context
 

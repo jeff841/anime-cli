@@ -3,46 +3,49 @@ checkpoint: null
 complexity: P
 created_at: "2026-11-13 11:07:22"
 criteria:
-    - done: false
+    - done: true
       test: awk '/^## Configuration/{c=NR} /^### Server URL/{s=NR} /^## MyAnimeList API/{m=NR} END{exit !(c && s>c && m>s)}' README.md
       text: README has a '### Server URL' subsection inside '## Configuration' (before '## MyAnimeList API')
-    - done: false
+    - done: true
       test: grep -qE '^1\. .*ANIME_API_URL' README.md && grep -qE '^2\. .*api_url.*config\.json' README.md && grep -qE '^3\. .*http://127\.0\.0\.1:8000' README.md
       text: README lists the precedence env var -> config.json api_url -> default as a numbered list in that order
-    - done: false
+    - done: true
       test: 'grep -qF ''export ANIME_API_URL=http://nas.local:8000'' README.md && grep -qE ''"api_url": *"http://nas\.local:8000"'' README.md'
       text: README shows the ANIME_API_URL export example and the config.json JSON example with api_url
-    - done: false
+    - done: true
       test: grep -qF '~/.config/anime/config.json' README.md && grep -qF 'Library/Application Support/anime/config.json' README.md && grep -qF 'anime\anime\config.json' README.md
       text: README gives the config.json location for Linux, macOS and Windows
-    - done: false
+    - done: true
       test: 'grep -qF ''exit code 1'' README.md && grep -qF ''Invalid server URL "ftp://x" (from ANIME_API_URL): must start with http:// or https://'' README.md'
       text: 'README documents the error behavior: one stderr line, exit code 1, and the example message'
-    - done: false
+    - done: true
       test: grep -qF '**Security:**' README.md && grep -qi 'trusted' README.md && grep -qiE 'https.*non-loopback|non-loopback.*https' README.md
       text: README states the configured server is trusted and recommends https for non-loopback hosts
-    - done: false
+    - done: true
       test: grep -qF 'pip install -e ".[dev]"' README.md && grep -qE '^pytest$' README.md && grep -q '^### Running tests' README.md
       text: README Development section shows how to install the dev extra and run pytest
-    - done: false
+    - done: true
       test: grep -qE '[├└]── config\.py' README.md && grep -qE '[├└]── constants\.py' README.md && grep -qE '[├└]── test_config\.py' README.md
       text: Project Structure tree lists anime/config.py, anime/constants.py and tests/test_config.py
 deps: []
+diff_base: 3f9349090f1095088f08bda70071a8ad873dff45
+diff_tip: 488669f86d9a0069663be099ae85fb99d38c6bd5
 files:
     - README.md
 id: TASK-002
 n45_version: 1.1.0
-outcome: ""
+outcome: |
+    Docs only (README.md): `### Server URL` under `## Configuration` documents ANIME_API_URL > config.json `api_url` > default `http://127.0.0.1:8000`, config.json paths per OS, validation/error behavior (stderr line, exit code 1, no fallback), security note; `### Running tests` under Development (`pip install -e ".[dev]"`, `pytest`); Project Structure lists config.py, constants.py, tests/test_config.py. No code/contract changes.
 persona: backend
 phase: Phase 1 — Configurable server URL
 roadmap: feat-0001-configurable-server-url
-status: pending
+status: done
 tdd:
     green: false
     red: false
     refactor: false
 title: Document server URL configuration and test setup in README
-updated_at: "2026-11-13 11:07:22"
+updated_at: "2026-11-13 11:10:52"
 ---
 ## Context
 

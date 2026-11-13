@@ -12,14 +12,14 @@ phases:
           deps: []
           id: TASK-001
           persona: backend
-          status: pending
+          status: done
           title: Resolve server URL from ANIME_API_URL / config.json with validation and pytest suite
         - complexity: P
           deps: []
           id: TASK-002
           persona: backend
-          status: pending
+          status: done
           title: Document server URL configuration and test setup in README
 status: in-progress
-updated_at: "2026-11-13 11:08:37"
+updated_at: "2026-11-13 11:11:24"
 ---
