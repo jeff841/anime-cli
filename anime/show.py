@@ -1,6 +1,5 @@
 from .constants import METADATA
 
-
 def show(anime):
     episodes = [ep.name for ep in anime.iterdir() if ep.name != METADATA]
     episodes.append("Get anime information")

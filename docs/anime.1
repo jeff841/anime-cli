@@ -1,0 +1,175 @@
+.TH ANIME 1 "September 2026" "anime-ctl 0.1.2" "User Commands"
+.SH NAME
+anime \- manage and watch a local anime collection
+.SH SYNOPSIS
+.B anime
+.RI [ ANIME_NAME
+.RI [ EPISODE ]]
+.br
+.B anime
+.BR \-\-rename
+.RI [ DIRECTORY ]
+.br
+.B anime
+.BR \-\-add
+.I DIRECTORY
+.br
+.B anime
+.BR \-\-move
+.I SERIES
+.RI [ DESTINATION ]
+.SH DESCRIPTION
+.B anime
+is a curses-based manager and VLC player for local anime collections.
+It browses series and episodes, records watched status in filenames, renames
+episode files, and retrieves anime details and artwork through a hosted API.
+.PP
+On first use, the program asks for the collection directory. Each immediate
+subdirectory is treated as a series. Series-name matching is case-insensitive.
+Episodes are specified as
+.BR ep NUMBER ,
+for example
+.B ep1
+or
+.BR ep10 .
+.SH OPTIONS
+.TP
+.BR \-h ", " \-\-help
+Show command-line help and exit.
+.TP
+.BR \-\-rename " [" DIRECTORY "]"
+Sort and rename regular files in
+.I DIRECTORY
+sequentially as
+.BR ep1- ,
+.BR ep2- ,
+and so on. The
+.B anime.json
+file is excluded. Without a directory, open an interactive selector.
+.IP
+.B Warning:
+this changes filenames in place, removes the original names and extensions,
+and provides no undo operation.
+.TP
+.BI \-\-add " DIRECTORY"
+Move a series directory into the configured collection. It is not copied, and
+an existing series with the same name is not overwritten.
+.TP
+.BI \-\-move " SERIES " [ DESTINATION ]
+Move a series out of the collection. If
+.I DESTINATION
+is omitted, use the home directory. The destination must already exist.
+.PP
+The three action options are mutually exclusive.
+.SH INTERACTIVE INTERFACE
+Use the Up and Down arrow keys to change the selection and Enter to open it.
+The mouse wheel changes the selection; the left button activates supported
+actions. Press
+.B :
+to enter a command. The terminal must be at least 90 columns wide.
+.PP
+Artwork is displayed when the
+.B kitty
+executable and graphics protocol are available. The remaining interface works
+without artwork.
+.SH INTERACTIVE COMMANDS
+Quote names and paths containing spaces. Availability depends on the menu.
+.TP
+.BR "open " ENTRY ", o " ENTRY
+Open an entry by its one-based menu number or exact name. From an episode
+menu, the name may identify another series.
+.TP
+.BR "play " SERIES " [" EPISODE "]", "p " SERIES " [" EPISODE "]"
+From the series menu, play a named series, optionally beginning at a specified
+episode.
+.TP
+.BR "play [" EPISODE "]", "p [" EPISODE "]"
+From an episode menu, play the specified episode. Without an argument, begin
+with the first unwatched episode.
+.TP
+.BR "rename " SERIES ", r " SERIES
+From the series menu, rename the named series' files.
+.TP
+.BR "rename [" SERIES "]", "r [" SERIES "]"
+From an episode menu, rename the current or named series.
+.TP
+.BR "add " DIRECTORY ", a " DIRECTORY
+From the series menu, move a directory into the collection.
+.TP
+.BR "move " SERIES " [" DESTINATION "]"
+From the series menu, move a series out of the collection.
+.TP
+.BR "quit, q"
+Exit from the series menu or return to it from an episode menu.
+.SH PLAYBACK AND WATCHED STATUS
+VLC is run fullscreen with
+.BR \-\-play-and-exit .
+Playback starts at the selected episode and continues through later episode
+entries. After launch, an episode filename receives the suffix
+.B watched
+unless already marked. The menu can reset watched status.
+.SH DIRECTORY STRUCTURE
+Episode filenames are expected to begin with
+.BR ep NUMBER - .
+For example:
+.PP
+.nf
+~/anime/
+    Nisekoi/
+        ep1-
+        ep2-
+        ep3-watched
+        anime.json
+        Extras/
+.fi
+.PP
+The optional
+.B Extras
+subdirectory accepts entries beginning with
+.BR ep ,
+.BR op ,
+or
+.BR ed .
+.SH FILES
+.TP
+.I ~/.config/anime/directory.json
+Collection configuration on Linux. Other systems use the platform-specific
+directory selected by
+.BR platformdirs (3).
+.TP
+.I ~/.cache/anime/pictures/
+Downloaded artwork on Linux.
+.TP
+.I SERIES/anime.json
+Optional MyAnimeList identifier and retrieved series metadata.
+.SH NETWORK
+Search, metadata, and artwork require network access. The client uses
+.BR https://anime-cli.onrender.com .
+MyAnimeList credentials remain on that server.
+.SH DEPENDENCIES
+VLC must be available as
+.B vlc
+or
+.B vlc.exe
+on
+.BR PATH .
+Tk is used for graphical directory selection. Kitty is optional.
+.SH EXAMPLES
+.nf
+anime
+anime "Nisekoi"
+anime "Nisekoi" ep3
+anime --add ~/Downloads/Nisekoi
+anime --move "Nisekoi" ~/Videos
+anime --rename
+.fi
+.SH EXIT STATUS
+Normal completion returns 0. Argument errors return 2. Runtime failures may
+return another nonzero status.
+.SH BUGS
+Report bugs at https://github.com/jeff841/anime-cli/issues.
+.SH AUTHOR
+Jefferson Ribeiro Amorim Filho. jribeiroamorimfilho@gmail.com.
+.SH SEE ALSO
+.BR vlc (1),
+.BR pipx (1)

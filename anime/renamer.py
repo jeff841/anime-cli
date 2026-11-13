@@ -3,15 +3,17 @@ from pathlib import Path
 from .cli import menu
 import tkinter as tk
 from tkinter import filedialog
-from .constants import EXPLORER_DIR,INV_DIR
+from .constants import EXPLORER_DIR,INV_DIR,METADATA
 
 def rename():
     choices = ['Enter directory path','Open file explorer','Exit']
-    selected = wrapper(menu,choices)
-    if choices[selected] == 'Enter directory path':
+    result = wrapper(menu,choices)
+    if result.command == 'quit' or result.selected is None:
+        return
+    if choices[result.selected] == 'Enter directory path':
         directory = Path(input('Enter the selected directory: '))
         rename_sort(directory)
-    elif choices[selected] == 'Open file explorer':
+    elif choices[result.selected] == 'Open file explorer':
         root = tk.Tk()
         root.withdraw()
         directory = Path(filedialog.askdirectory(title=EXPLORER_DIR))
@@ -25,7 +27,7 @@ def rename_sort(directory):
         return
     files = sorted(
             f for f in directory.iterdir()
-            if f.is_file()
+            if f.is_file() and f.name != METADATA
             )
     for count,file in enumerate(files,start=1):
         file.rename(directory/f"ep{count}-")        

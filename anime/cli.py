@@ -1,8 +1,10 @@
 import curses
-from curses import KEY_UP, KEY_DOWN, KEY_ENTER
+from curses import BUTTON1_CLICKED, BUTTON5_PRESSED, KEY_MOUSE, KEY_UP, KEY_DOWN, KEY_ENTER, getmouse,mousemask,ALL_MOUSE_EVENTS,REPORT_MOUSE_POSITION,curs_set, BUTTON4_PRESSED
 from textwrap import wrap
 import os
 import shutil
+from .commands import MenuContext, run_command
+from .menu_result import MenuResult
 from .kitty import show_image
 from .constants import TERMINAL_NARROW
 
@@ -10,11 +12,41 @@ MENU_WIDTH = 55
 IMAGE_X = 60
 IMAGE_Y = 2
 
+def command_line(win, height):
+    win.move(height - 1, 0)
+    win.clrtoeol()
+    win.addstr(height - 1, 0, ":")
+    win.refresh()
+    curses.echo()
+    try:
+        command = win.getstr(height - 1, 1).decode().strip()
+    finally:
+        curses.noecho()
+    return command
+
 def kitty_available():
     return os.name != "nt" and shutil.which("kitty") is not None
 
-def menu(stdscr, choices, items=None, picture=None):
+def menu_rows(choices, button_start):
+    rows = list(range(len(choices)))
+    if button_start is not None and 0 < button_start < len(choices):
+        rows.insert(button_start, None)
+    return rows
+
+def menu(
+    stdscr,
+    choices,
+    items=None,
+    picture=None,
+    screen="generic",
+    targets=None,
+    click_commands=None,
+    button_start=None,
+):
+    curs_set(0)
+    mousemask(ALL_MOUSE_EVENTS|REPORT_MOUSE_POSITION)
     current = 0
+    offset = 0
     height, width = stdscr.getmaxyx()
     if width < MENU_WIDTH + 35:
         stdscr.addstr(
@@ -24,7 +56,7 @@ def menu(stdscr, choices, items=None, picture=None):
         )
         stdscr.refresh()
         stdscr.getch()
-        return 0
+        return MenuResult()
     win = curses.newwin(
         height,
         MENU_WIDTH,
@@ -49,51 +81,85 @@ def menu(stdscr, choices, items=None, picture=None):
                 break
     y += 1
     menu_start = y
-    for i, option in enumerate(choices):
-        row = menu_start + i
-        if row >= height:
-            break
-        text = (
-            f"> {option}"
-            if i == current
-            else f"  {option}"
-        )
-        win.addstr(
-            row,
-            0,
-            text[:MENU_WIDTH - 1]
-        )
-    win.refresh()
+    visible = height - menu_start
+    if visible <= 0:
+        return MenuResult()
+    rows = menu_rows(choices, button_start)
+    def draw_menu():
+        win.erase()
+        y = 0
+        if items:
+            for item in items:
+                lines = wrap(str(item), MENU_WIDTH - 1)
+                for line in lines:
+                    if y >= menu_start:
+                        break
+                    win.addstr(
+                        y,
+                        0,
+                        line[:MENU_WIDTH - 1]
+                    )
+                    y += 1
+                if y >= menu_start:
+                    break
+        for row in range(visible):
+            row_index = offset + row
+            if row_index >= len(rows):
+                break
+            index = rows[row_index]
+            if index is None:
+                continue
+            text = (
+                f"> {choices[index]}"
+                if index == current
+                else f"  {choices[index]}"
+            )
+            win.addstr(
+                menu_start + row,
+                0,
+                text[:MENU_WIDTH - 1]
+            )
+        win.refresh()
+    draw_menu()
     if picture and kitty_available():
         show_image(
             picture,
-            x=60,
-            y=2,
+            x=IMAGE_X,
+            y=IMAGE_Y,
         )
     while True:
         key = win.getch()
         if key == KEY_UP:
-            old = current
             current = (current - 1) % len(choices)
         elif key == KEY_DOWN:
-            old = current
             current = (current + 1) % len(choices)
+        elif key == KEY_MOUSE:
+            _,x,y,_,button_state = getmouse()
+            if button_state & BUTTON1_CLICKED:
+                row_index = offset + (y - menu_start)
+                index = rows[row_index] if 0 <= row_index < len(rows) else None
+                if index is not None:
+                    current = index
+                    command = (click_commands or {}).get(choices[current])
+                    if command is not None:
+                        return MenuResult(command=command)
+            if button_state & BUTTON4_PRESSED:
+                current = max(0,current - 1)
+            elif button_state & BUTTON5_PRESSED:
+                current = min(len(choices) - 1, current + 1)
         elif key in (KEY_ENTER, 10, 13):
-            return current
+            return MenuResult(selected=current)
+        elif key == ord(":"):
+            command = command_line(win, height)
+            result = run_command(command, MenuContext(choices, current, screen, targets))
+            if result is not None:
+                return result
+            draw_menu()
         else:
             continue
-        old_row = menu_start + old
-        if old_row < height:
-            win.addstr(
-                old_row,
-                0,
-                f"  {choices[old]}"[:MENU_WIDTH - 1]
-            )
-        new_row = menu_start + current
-        if new_row < height:
-            win.addstr(
-                new_row,
-                0,
-                f"> {choices[current]}"[:MENU_WIDTH - 1]
-            )
-        win.refresh()
+        current_row = rows.index(current)
+        if current_row >= offset + visible:
+            offset = current_row - visible + 1
+        elif current_row < offset:
+            offset = current_row
+        draw_menu()

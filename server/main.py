@@ -1,22 +1,41 @@
-from fastapi import FastAPI
-from .mal import MyAnimeList
-from os import environ
-from .cache import Cache
-from dotenv import load_dotenv
+from time import perf_counter
 
-load_dotenv()
-app = FastAPI()
+from fastapi import FastAPI, HTTPException
+
+from .cache import Cache
+from .mal import MALAPI
+
+app = FastAPI(title="anime-cli API")
+
 cache = Cache()
-mal = MyAnimeList(environ["MAL_CLIENT_ID"],cache)
+api = MALAPI(cache)
+
 
 @app.get('/')
 def root():
     return {"status": "ok"}
 
+
 @app.get("/anime/search")
-async def anime_search(q: str):
-    return await mal.search_anime(q)
+def anime_search(q: str):
+    started = perf_counter()
+    if not q.strip():
+        raise HTTPException(status_code=400, detail="Search query cannot be empty")
+
+    result = api.search_anime(q)
+    print(
+        f"REQUEST /anime/search?q={q!r}: {(perf_counter() - started) * 1000:.1f}ms",
+        flush=True,
+    )
+    return result
+
 
 @app.get("/anime/{anime_id}")
-async def anime_get(anime_id: int):
-    return await mal.get_anime(anime_id)
+def anime_get(anime_id: int):
+    started = perf_counter()
+    result = api.get_anime(anime_id)
+    print(
+        f"REQUEST /anime/{anime_id}: {(perf_counter() - started) * 1000:.1f}ms",
+        flush=True,
+    )
+    return result

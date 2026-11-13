@@ -4,7 +4,7 @@ from pathlib import Path
 
 from anime.config import ConfigError, config_file_path, get_api_url, resolve_api_url
 
-DEFAULT = "http://127.0.0.1:8000"
+DEFAULT = "https://anime-cli.onrender.com"
 SCHEME_REASON = "must start with http:// or https://"
 
 
