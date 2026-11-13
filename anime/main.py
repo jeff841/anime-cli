@@ -14,7 +14,8 @@ from .extra import extra
 from .episode import episode
 import sys
 from pathlib import Path
-from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA,API_URL
+from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA
+from .config import get_api_url
 
 def main():
     parser = ArgumentParser(description=PARSER_DESCRIPTION)
@@ -43,10 +44,10 @@ def main():
             print('No such episode')
             return
     else:
+        api = AnimeAPI(get_api_url())
         anime = watch_input(args.anime_name)
         items = None
         picture = None
-        api = AnimeAPI(API_URL)
         if anime is None:
             return
         metadata_file = anime/METADATA
