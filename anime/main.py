@@ -16,6 +16,7 @@ from .episode import episode
 import sys
 from pathlib import Path
 from .constants import PARSER_DESCRIPTION,ANINAME_HELP,EP_HELP,RENAME_HELP,EP_ERROR,METADATA
+from .config import get_api_url
 from .anime_details import anime_details
 
 def main():
@@ -79,8 +80,8 @@ def main():
             print('No such episode')
             return
     else:
+        api = RemoteAnimeAPI(get_api_url())
         anime = watch_input(args.anime_name)
-        api = RemoteAnimeAPI()
         if anime is None:
             return
         metadata_file, items, picture = anime_details(anime, api)

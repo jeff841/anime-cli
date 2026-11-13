@@ -1,0 +1,84 @@
+{"op":"add","kind":"mod","id":"mod:anime/main","name":"Entrypoint CLI: parse argumentos e orquestra menu, play e rename","attr":{"layer":"transport"},"src":[{"path":"anime/main.py","sha":"4bbb64774876ef85a7ec0f5fd0019cd245095ef3"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/__main__","name":"Entrypoint para python -m anime","attr":{"layer":"transport"},"src":[{"path":"anime/__main__.py","sha":"eedcee19b780e49889584fe0f69ce57135d2b0a9"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/cli","name":"Menu curses com painel de informacoes e imagem","attr":{"layer":"ui"},"src":[{"path":"anime/cli.py","sha":"20a39a81bbd1990b09cb1aabf3aaf03185475cc4"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/constants","name":"Constantes e mensagens da aplicacao","attr":{"layer":"shared"},"src":[{"path":"anime/constants.py","sha":"2ea0a11763911ee1702d619531d33f6797f35741"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/api","name":"Cliente HTTP do servidor de metadados","attr":{"layer":"infra"},"src":[{"path":"anime/api.py","sha":"5496bf11fd49032d10f9b0a48a9a628641ae3042"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/episode","name":"Validador do argumento epN","attr":{"layer":"shared"},"src":[{"path":"anime/episode.py","sha":"e7250052528d876925c2b9035a1e8e2523c82df7"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/extra","name":"Fluxo de reproducao da pasta Extras","attr":{"layer":"application"},"src":[{"path":"anime/extra.py","sha":"98a8cf988526f4ee56b4e0456097ecfd114e56de"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/kitty","name":"Renderiza imagem no terminal via kitty icat","attr":{"layer":"infra"},"src":[{"path":"anime/kitty.py","sha":"e35dd1c9e50e420b5799ac5d5a1312173826e5f7"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/picture","name":"Baixa e cacheia capa do anime","attr":{"layer":"infra"},"src":[{"path":"anime/picture.py","sha":"170498ad1761ecec1440af0e097ea1a435b8301c"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/play","name":"Reproduz episodios no VLC e marca como assistidos","attr":{"layer":"application"},"src":[{"path":"anime/play.py","sha":"8cf2a8dc8bf647404901a17b8f1a90bd2e186a54"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/renamer","name":"Renomeia arquivos para o padrao epN-","attr":{"layer":"application"},"src":[{"path":"anime/renamer.py","sha":"bb84c76753144a164677a54e5f478361036a8506"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/reset_watched","name":"Remove marca de assistido dos episodios","attr":{"layer":"application"},"src":[{"path":"anime/reset_watched.py","sha":"228800a6c3925f21caffc22ab0c311212186f6b1"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/show","name":"Lista episodios e opcoes do menu da serie","attr":{"layer":"application"},"src":[{"path":"anime/show.py","sha":"6f011e905e3cf0c02c1b6a63c856ca776b71ab28"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/watch_input","name":"Config do diretorio de animes e selecao da serie","attr":{"layer":"application"},"src":[{"path":"anime/watch_input.py","sha":"e630e11ce86271efa175e5851f8acc21d02e8ce7"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:server/main","name":"Servidor FastAPI proxy da MyAnimeList","attr":{"layer":"transport"},"src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:server/mal","name":"Cliente MyAnimeList com cache","attr":{"layer":"infra"},"src":[{"path":"server/mal.py","sha":"bca414afd8739b4b4c218bde70f800d9d983b688"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:server/cache","name":"Cache SQLite com TTL","attr":{"layer":"infra"},"src":[{"path":"server/cache.py","sha":"d21fa415287481eafb52107e64ea7a547efa2ff4"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:platformdirs","name":"Diretorios de config e cache por plataforma","src":[{"path":"pyproject.toml","sha":"d21b4268f6e14533dcacdd64759eeddc23127113"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:httpx","name":"Cliente HTTP sincrono e assincrono","src":[{"path":"pyproject.toml","sha":"d21b4268f6e14533dcacdd64759eeddc23127113"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:python-dotenv","name":"Carrega .env","src":[{"path":"pyproject.toml","sha":"d21b4268f6e14533dcacdd64759eeddc23127113"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:requests","name":"Download da imagem de capa","src":[{"path":"pyproject.toml","sha":"d21b4268f6e14533dcacdd64759eeddc23127113"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:fastapi","name":"Framework do servidor de metadados (nao declarado no manifesto)","src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"dep","id":"dep:api.myanimelist.net","name":"API externa MyAnimeList v2","src":[{"path":"server/mal.py","sha":"bca414afd8739b4b4c218bde70f800d9d983b688"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"endpoint","id":"http:GET /","name":"Healthcheck do servidor","attr":{"access":"publico"},"src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"endpoint","id":"http:GET /anime/search","name":"Busca animes na MyAnimeList por nome","attr":{"access":"publico"},"src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"endpoint","id":"http:GET /anime/{anime_id}","name":"Detalhes de um anime por id MAL","attr":{"access":"publico"},"src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"model","id":"model:Cache","name":"Entrada de cache com TTL","attr":{"table":"cache"},"src":[{"path":"server/cache.py","sha":"d21fa415287481eafb52107e64ea7a547efa2ff4"}],"ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"config","id":"config:MAL_CLIENT_ID","name":"Client ID da API MyAnimeList","attr":{"desc":"Client ID da API MyAnimeList lido de .env","kind":"secret","required":"sim"},"src":[{"path":"server/main.py","sha":"02635c0e538e4cb74d0dec1dbdf61b310e696c9b"}],"ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"http:GET /","edge":"exposes","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"http:GET /anime/search","edge":"exposes","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"http:GET /anime/{anime_id}","edge":"exposes","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/api","to":"http:GET /anime/search","edge":"calls","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/api","to":"http:GET /anime/{anime_id}","edge":"calls","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/cli","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/renamer","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/picture","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/api","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/watch_input","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/show","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/play","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/reset_watched","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/extra","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/episode","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/__main__","to":"mod:anime/main","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/cli","to":"mod:anime/kitty","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/cli","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/extra","to":"mod:anime/show","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/extra","to":"mod:anime/cli","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/extra","to":"mod:anime/reset_watched","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/extra","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/picture","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/picture","to":"dep:requests","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/picture","to":"dep:platformdirs","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/play","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/renamer","to":"mod:anime/cli","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/renamer","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/show","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/episode","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/watch_input","to":"mod:anime/cli","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/watch_input","to":"mod:anime/constants","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/watch_input","to":"dep:platformdirs","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:anime/api","to":"dep:httpx","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"mod:server/mal","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"mod:server/cache","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"dep:fastapi","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"dep:python-dotenv","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/main","to":"config:MAL_CLIENT_ID","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/mal","to":"dep:httpx","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/mal","to":"dep:api.myanimelist.net","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"link","from":"mod:server/cache","to":"model:Cache","edge":"depends","ts":"2026-11-13 10:40:43"}
+{"op":"add","kind":"mod","id":"mod:anime/config","name":"Resolves and validates the server URL from env var or config.json","attr":{"layer":"infra"},"src":[{"path":"anime/config.py","sha":"18f67c3e62b0415e12518803c23f60e50aa3db1a"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"add","kind":"config","id":"config:ANIME_API_URL","attr":{"desc":"Server URL for the metadata API; overrides config.json api_url","example":"http://192.168.1.10:8000","kind":"env","required":"não"},"src":[{"path":"anime/constants.py","sha":"866a48ca40eb6da858a4128236ee2a7291f738c3"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/config","to":"config:ANIME_API_URL","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/main","to":"mod:anime/config","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:11:11"}
+{"op":"link","from":"mod:anime/config","to":"dep:platformdirs","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"link","from":"mod:anime/config","to":"mod:anime/constants","edge":"depends","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"add","kind":"dep","id":"dep:pytest","attr":{"scope":"dev"},"src":[{"path":"pyproject.toml","sha":"3d1842761761997c98c88b4e6af8e43769b48871"}],"feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:29"}
+{"op":"remove","kind":"dep","id":"dep:pytest","feat":"feat-0001-configurable-server-url","task":"TASK-001","ts":"2026-11-13 11:19:33"}
+{"op":"add","kind":"feature","id":"feat:feat-0001-configurable-server-url","name":"feat-0001-configurable-server-url","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"mod:anime/config","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"config:ANIME_API_URL","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"link","from":"feat:feat-0001-configurable-server-url","to":"dep:pytest","edge":"touches","feat":"feat-0001-configurable-server-url"}
+{"op":"restamp","paths":{"anime/constants.py":"866a48ca40eb6da858a4128236ee2a7291f738c3","anime/main.py":"b4255065733c627877c4fa1305d422475ff5f1c6","pyproject.toml":"3d1842761761997c98c88b4e6af8e43769b48871"},"ts":"2026-11-13 11:19:33"}

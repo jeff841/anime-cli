@@ -17,8 +17,15 @@ dependencies = [
     "requests"
 ]
 
+[project.optional-dependencies]
+dev = ["pytest>=7"]
+
 [project.scripts]
 anime = "anime.main:main"
 
 [tool.setuptools.packages.find]
 include = ["anime*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

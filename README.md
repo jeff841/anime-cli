@@ -208,6 +208,53 @@ To change the configured collection directory, use the **Change anime directory*
 
 Personal configuration should not be committed to Git.
 
+### Server URL
+
+The CLI fetches anime metadata from a metadata server, by default the hosted API at `https://anime-cli.onrender.com`, and you can point it at another server (for example a local one) without editing code.
+
+The server URL is resolved in this order:
+
+1. `ANIME_API_URL` environment variable
+2. `api_url` key in `config.json`
+3. Default: `https://anime-cli.onrender.com`
+
+For example, using the environment variable:
+
+```bash
+export ANIME_API_URL=http://nas.local:8000
+anime
+```
+
+Or persistently, using a `config.json` file in the same configuration directory as `directory.json`:
+
+* Linux: `~/.config/anime/config.json`
+* macOS: `~/Library/Application Support/anime/config.json`
+* Windows: `%LOCALAPPDATA%\anime\anime\config.json`
+
+```json
+{
+    "api_url": "http://nas.local:8000"
+}
+```
+
+The CLI never creates or edits this file; you create it yourself. Unknown keys are ignored.
+
+The value is normalized and validated:
+
+* An empty or whitespace-only value counts as unset and falls through to the next source.
+* Surrounding whitespace and a trailing `/` are removed (`http://nas.local:8000/` becomes `http://nas.local:8000`). A path such as `http://host/api` is allowed.
+* The URL must use `http://` or `https://`, have a host, have a valid port (if any), and must not contain credentials (`user:password@`).
+
+If the URL is invalid, or `config.json` is malformed (unreadable, not UTF-8, invalid JSON, not a JSON object, or `api_url` not a string), the CLI prints one error line to stderr and exits with exit code 1. There is no fallback to the next source when a set value is invalid. For example, with `ANIME_API_URL=ftp://x`:
+
+```text
+Invalid server URL "ftp://x" (from ANIME_API_URL): must start with http:// or https://
+```
+
+The URL is only read when opening the interactive menu (`anime` or `anime <name>`). `anime --rename` and `anime <name> ep<N>` never read it.
+
+> **Security:** the configured server is trusted. The CLI displays whatever metadata and cover images it returns, so only point it at a server you trust. Use `https` for non-loopback hosts (anything other than `127.0.0.1` or `localhost`), because `http` sends requests in clear text over the network.
+
 ## MyAnimeList Integration
 
 MyAnimeList requests are made through the project's hosted API rather than directly from the installed CLI.
@@ -257,7 +304,13 @@ Then start the server:
 uvicorn server.main:app --reload
 ```
 
-The CLI's production API URL is defined in `anime/constants.py`. For local development, point the CLI at your local API by changing that value or using the API URL override supported by your local source version.
+The CLI's default (production) API URL is `DEFAULT_API_URL` in `anime/constants.py`. For local development, point the CLI at your local API without editing code:
+
+```bash
+ANIME_API_URL=http://127.0.0.1:8000 anime
+```
+
+See [Server URL](#server-url) for all options.
 
 **Never commit a real MAL client ID to Git.**
 
@@ -279,6 +332,15 @@ The application uses that ID to retrieve metadata such as:
 - Main artwork
 
 Artwork is displayed in terminals where Kitty graphics are available. The interface also works without Kitty; artwork is simply not displayed.
+
+### Running tests
+
+Install the development extra (which includes pytest) and run the test suite from the repository root:
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
 
 ## Building
 
@@ -352,6 +414,7 @@ anime-cli/
 │   ├── cli.py
 │   ├── collection.py
 │   ├── commands.py
+│   ├── config.py
 │   ├── constants.py
 │   ├── episode.py
 │   ├── extra.py
@@ -373,6 +436,8 @@ anime-cli/
 │   ├── mal.py
 │   ├── Dockerfile
 │   └── requirements.txt
+├── tests/
+│   └── test_config.py
 ├── render.yaml
 ├── pyproject.toml
 ├── README.md

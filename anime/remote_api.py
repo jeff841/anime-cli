@@ -1,5 +1,5 @@
 from httpx import Client, HTTPStatusError, RequestError
-from .constants import API_URL
+from .constants import DEFAULT_API_URL
 
 
 class RemoteAnimeAPI:
@@ -9,7 +9,7 @@ class RemoteAnimeAPI:
     sends the MAL client ID.
     """
 
-    def __init__(self, base_url: str = API_URL):
+    def __init__(self, base_url: str = DEFAULT_API_URL):
         self.base_url = base_url.rstrip("/")
 
     def _get(self, path: str, **params):
