@@ -158,6 +158,53 @@ The configuration is conceptually structured like:
 
 Do not manually commit your personal configuration files to the repository.
 
+### Server URL
+
+The CLI fetches anime metadata from a metadata server, by default `http://127.0.0.1:8000`, and you can change it without editing code.
+
+The server URL is resolved in this order:
+
+1. `ANIME_API_URL` environment variable
+2. `api_url` key in `config.json`
+3. Default: `http://127.0.0.1:8000`
+
+For example, using the environment variable:
+
+```bash
+export ANIME_API_URL=http://nas.local:8000
+anime
+```
+
+Or persistently, using a `config.json` file in the same configuration directory as `directory.json`:
+
+* Linux: `~/.config/anime/config.json`
+* macOS: `~/Library/Application Support/anime/config.json`
+* Windows: `%LOCALAPPDATA%\anime\anime\config.json`
+
+```json
+{
+    "api_url": "http://nas.local:8000"
+}
+```
+
+The CLI never creates or edits this file; you create it yourself. Unknown keys are ignored.
+
+The value is normalized and validated:
+
+* An empty or whitespace-only value counts as unset and falls through to the next source.
+* Surrounding whitespace and a trailing `/` are removed (`http://nas.local:8000/` becomes `http://nas.local:8000`). A path such as `http://host/api` is allowed.
+* The URL must use `http://` or `https://`, have a host, have a valid port (if any), and must not contain credentials (`user:password@`).
+
+If the URL is invalid, or `config.json` is malformed (unreadable, not UTF-8, invalid JSON, not a JSON object, or `api_url` not a string), the CLI prints one error line to stderr and exits with exit code 1. There is no fallback to the next source when a set value is invalid. For example, with `ANIME_API_URL=ftp://x`:
+
+```text
+Invalid server URL "ftp://x" (from ANIME_API_URL): must start with http:// or https://
+```
+
+The URL is only read when opening the interactive menu (`anime` or `anime <name>`). `anime --rename` and `anime <name> ep<N>` never read it.
+
+> **Security:** the configured server is trusted. The CLI displays whatever metadata and cover images it returns, so only point it at a server you control. Use `https` for non-loopback hosts (anything other than `127.0.0.1` or `localhost`), because `http` sends requests in clear text over the network.
+
 ## MyAnimeList API
 
 Some functionality uses the MyAnimeList API.
@@ -195,6 +242,15 @@ pip install -e .
 ```
 
 This allows changes to the source code to be tested without rebuilding the package after every change.
+
+### Running tests
+
+Install the development extra (which includes pytest) and run the test suite from the repository root:
+
+```bash
+pip install -e ".[dev]"
+pytest
+```
 
 ## Building
 
@@ -255,6 +311,8 @@ anime-cli/
 │   ├── __main__.py
 │   ├── api.py
 │   ├── cli.py
+│   ├── config.py
+│   ├── constants.py
 │   ├── episode.py
 │   ├── extra.py
 │   ├── kitty.py
@@ -265,6 +323,8 @@ anime-cli/
 │   ├── reset_watched.py
 │   ├── show.py
 │   └── watch_input.py
+├── tests/
+│   └── test_config.py
 ├── README.md
 ├── pyproject.toml
 └── .gitignore
