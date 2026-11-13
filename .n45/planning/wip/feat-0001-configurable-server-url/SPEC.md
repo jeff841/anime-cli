@@ -2,10 +2,10 @@
 created_at: "2026-11-13 10:52:33"
 id: feat-0001-configurable-server-url
 n45_version: 1.1.0
-status: proposed
+status: accepted
 title: Configurable metadata server URL
 type: feat
-updated_at: "2026-11-13 10:52:33"
+updated_at: "2026-11-13 11:07:35"
 ---
 ## 1. Overview
 
