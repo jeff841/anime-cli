@@ -5,7 +5,8 @@ id: feat-0001-configurable-server-url
 n45_version: 1.1.0
 phases:
     - name: Phase 1 — Configurable server URL
-      status: pending
+      started_at: "2026-11-13 11:08:37"
+      status: in-progress
       tasks:
         - complexity: M
           deps: []
@@ -20,5 +21,5 @@ phases:
           status: pending
           title: Document server URL configuration and test setup in README
 status: in-progress
-updated_at: "2026-11-13 11:03:31"
+updated_at: "2026-11-13 11:08:37"
 ---
